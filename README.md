@@ -34,6 +34,9 @@ cp .env.example .env
 # Edit .env, then load values into this shell for psql:
 set -a && source .env && set +a
 psql "${DATABASE_URL/+psycopg/}" -f schema.sql
+# Optional demo account; use the returned user_id in the dashboard:
+psql "${DATABASE_URL/+psycopg/}" -c "INSERT INTO users (email, name) VALUES ('demo@example.com', 'Demo User') ON CONFLICT (email) DO NOTHING;"
+psql "${DATABASE_URL/+psycopg/}" -c "SELECT user_id, email, name FROM users WHERE email = 'demo@example.com';"
 uvicorn src.main:app --reload
 ```
 
