@@ -839,7 +839,7 @@ function WalletIcon() {
 type AppRoute = "home" | "dashboard";
 
 function routeFromPath(): AppRoute {
-  return window.location.pathname.replace(/\\/+$/, "") === "/dashboard" ? "dashboard" : "home";
+  return window.location.pathname === "/dashboard" || window.location.pathname === "/dashboard/" ? "dashboard" : "home";
 }
 
 function App() {
