@@ -1,0 +1,59 @@
+# Mintline — Credit Management Dashboard
+
+A responsive React + TypeScript dashboard for the [backend-intern-credits](https://github.com/faizansaiyed123/backend-intern-credits) FastAPI service. It uses the backend's real balance and administration endpoints; it does not invent account history or persist fake balances.
+
+## Features
+
+- Live account balance and last-updated timestamp from the API.
+- Add, deduct, and reset credit operations with input validation, loading states, and visible errors.
+- Session-only activity feed for actions performed in the current browser session (the backend currently has no transaction-history endpoint).
+- API reachability indicator and manual refresh.
+- Admin migration history and guarded migration submission, using an API key entered at runtime and kept only in component memory.
+- Responsive dashboard layout with accessible labels, keyboard-friendly forms, and empty/error states.
+
+## Run locally
+
+Prerequisites: Node.js 20+ and the backend service with its PostgreSQL schema configured.
+
+```bash
+npm install
+cp .env.example .env
+npm run dev
+```
+
+By default the frontend calls `http://localhost:8000`. Set `VITE_API_BASE_URL` in `.env` if the backend runs elsewhere. Environment variables prefixed with `VITE_` are public browser configuration; **never put API keys or other secrets in them**.
+
+Run the backend from its repository with a configured `.env` and schema:
+
+```bash
+pip install -r src/requirements.txt
+psql "$DATABASE_URL" -f schema.sql
+uvicorn src.main:app --reload
+```
+
+The dashboard opens on user ID `1`. This backend does not expose user creation or a user directory endpoint, so that ID must already exist in the `users` table. Enter a different existing user ID in the dashboard header to switch accounts.
+
+## CORS
+
+The backend allows Vite's local origins by default. For a deployed frontend, configure the backend's `CORS_ORIGINS` environment variable with the exact frontend origin(s), comma-separated, for example:
+
+```env
+CORS_ORIGINS=http://localhost:5173,https://your-frontend.example.com
+```
+
+Set `VITE_API_BASE_URL` to the deployed API URL on the frontend host, then restart/redeploy both services as needed.
+
+## Admin migration warning
+
+The backend's `POST /api/schema/apply` endpoint executes supplied SQL using the database role in `DATABASE_URL`. The Admin screen requires an API key at runtime and does not store it, but a browser UI is not a security boundary. Use migration controls only for trusted administrators, use a least-privileged database role, and restrict access to the backend/admin endpoints at the network or deployment layer. Do not embed `ADMIN_API_KEY` in the frontend or publish it in a `VITE_` variable.
+
+## API contract used
+
+- `GET /healthz`
+- `GET /api/credits/{user_id}`
+- `POST /api/credits/{user_id}/add` with `{"amount": positiveInteger}`
+- `POST /api/credits/{user_id}/deduct` with `{"amount": positiveInteger}`
+- `PATCH /api/credits/{user_id}/reset`
+- `GET /api/schema/migrations` with `X-API-Key`
+- `POST /api/schema/apply` with `X-API-Key` and `{"migration_name": "...", "sql": "..."}`
+
