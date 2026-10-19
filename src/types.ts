@@ -26,12 +26,3 @@ export interface ApplyMigrationResult {
 }
 
 export type CreditOperation = "add" | "deduct" | "reset";
-
-export interface SessionActivity {
-  id: string;
-  userId: number;
-  operation: CreditOperation;
-  amount: number;
-  balanceAfter: number;
-  createdAt: string;
-}
