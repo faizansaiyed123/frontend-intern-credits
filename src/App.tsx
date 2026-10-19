@@ -149,6 +149,25 @@ function Dashboard({ onGoHome }: { onGoHome: () => void }) {
     return () => window.removeEventListener("keydown", closeOnEscape);
   }, [mobileNavOpen]);
 
+  useEffect(() => {
+    if (!mobileNavOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [mobileNavOpen]);
+
+  useEffect(() => {
+    const desktopViewport = window.matchMedia("(min-width: 861px)");
+    const closeOnDesktop = () => {
+      if (desktopViewport.matches) setMobileNavOpen(false);
+    };
+    desktopViewport.addEventListener("change", closeOnDesktop);
+    closeOnDesktop();
+    return () => desktopViewport.removeEventListener("change", closeOnDesktop);
+  }, []);
+
   function showNotice(kind: Notice["kind"], text: string) {
     setNotice({ kind, text });
   }
@@ -304,18 +323,7 @@ function Dashboard({ onGoHome }: { onGoHome: () => void }) {
             <span className="brand-name">mintline<span>.</span></span>
             <span className="brand-subtitle">CREDIT WORKSPACE</span>
           </div>
-          {mobileNavOpen && (
-            <button
-              type="button"
-              className="icon-button sidebar-close"
-              aria-label="Close navigation"
-              aria-controls="primary-navigation"
-              aria-expanded={mobileNavOpen}
-              onClick={() => setMobileNavOpen(false)}
-            >
-              <X size={18} />
-            </button>
-          )}
+
         </div>
 
         <div className="workspace-label">WORKSPACE</div>
@@ -383,20 +391,18 @@ function Dashboard({ onGoHome }: { onGoHome: () => void }) {
       </aside>
 
       <main className="main-panel">
-        <header className="topbar">
+        <header className={`topbar ${mobileNavOpen ? "topbar-nav-open" : ""}`}>
           <div className="topbar-left">
-            {!mobileNavOpen && (
-              <button
-                type="button"
-                className="icon-button mobile-menu"
-                aria-label="Open navigation"
-                aria-controls="primary-navigation"
-                aria-expanded={mobileNavOpen}
-                onClick={() => setMobileNavOpen(true)}
-              >
-                <Menu size={20} />
-              </button>
-            )}
+            <button
+              type="button"
+              className="icon-button mobile-menu"
+              aria-label={mobileNavOpen ? "Close navigation" : "Open navigation"}
+              aria-controls="primary-navigation"
+              aria-expanded={mobileNavOpen}
+              onClick={() => setMobileNavOpen((isOpen) => !isOpen)}
+            >
+              {mobileNavOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
             <div className="breadcrumb">
               <span>Workspace</span>
               <ChevronRight size={14} />
