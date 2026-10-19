@@ -487,20 +487,25 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .balance-card { min-height: 278px; }
 }
 @media (max-width: 860px) {
-  .sidebar { z-index: 60; width: 264px; transform: translateX(-102%); transition: transform 220ms ease; box-shadow: none; }
+  .sidebar { z-index: 60; width: min(252px, 86vw); transform: translateX(-102%); transition: transform 220ms ease; box-shadow: none; overscroll-behavior: contain; }
   .sidebar.sidebar-open { transform: translateX(0); box-shadow: 15px 0 50px rgba(8, 31, 24, 0.25); }
   .sidebar-close, .mobile-menu { display: inline-grid; }
   .sidebar-close { margin-left: auto; width: 30px; height: 30px; border-color: rgba(255,255,255,0.13); color: #d6e9e0; background: rgba(255,255,255,0.07); }
   .mobile-scrim { position: fixed; z-index: 50; inset: 0; display: block; border: 0; background: rgba(8, 25, 20, 0.35); }
   .main-panel { margin-left: 0; }
   .topbar { min-height: 67px; padding: 0 23px; }
-  .topbar-left { gap: 12px; }
-  .mobile-menu { width: 33px; height: 33px; }
+  .topbar-left { min-width: 0; gap: 12px; }
+  .mobile-menu { width: 33px; height: 33px; flex: 0 0 33px; }
   .content-wrap { padding: 28px 24px 22px; }
 }
 @media (max-width: 640px) {
   .topbar { padding: 0 16px; }
-  .topbar-actions { gap: 8px; }
+  .topbar-left { min-width: 0; flex: 1; }
+  .topbar-actions { flex: 0 0 auto; gap: 8px; }
+  .breadcrumb { min-width: 0; overflow: hidden; }
+  .breadcrumb > span, .breadcrumb > svg { display: none; }
+  .breadcrumb strong { overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+  .topbar-docs, .topbar-avatar { display: none; }
   .connection-pill { padding: 7px 8px; font-size: 0; gap: 0; }
   .connection-pill .status-dot { width: 7px; height: 7px; }
   .topbar-docs { width: 32px; height: 32px; }
