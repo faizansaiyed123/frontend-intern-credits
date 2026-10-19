@@ -12,6 +12,7 @@ import {
   Database,
   ExternalLink,
   Gauge,
+  Home,
   LayoutDashboard,
   LoaderCircle,
   LockKeyhole,
@@ -41,6 +42,7 @@ import type {
   CreditOperation,
   SchemaMigration,
 } from "./types";
+import HomePage from "./HomePage";
 
 type Page = "overview" | "admin";
 type ApiState = "checking" | "online" | "offline";
@@ -77,7 +79,7 @@ function operationTitle(operation: CreditOperation): string {
   return "Reset balance";
 }
 
-function App() {
+function Dashboard({ onGoHome }: { onGoHome: () => void }) {
   const [page, setPage] = useState<Page>("overview");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [draftUserId, setDraftUserId] = useState("1");
@@ -318,6 +320,10 @@ function App() {
 
         <div className="workspace-label">WORKSPACE</div>
         <nav id="primary-navigation" className="main-nav" aria-label="Main navigation">
+          <button type="button" className="nav-link" onClick={() => { setMobileNavOpen(false); onGoHome(); }}>
+            <Home size={18} />
+            <span>Home</span>
+          </button>
           <button
             type="button"
             className={`nav-link ${page === "overview" ? "active" : ""}`}
@@ -828,6 +834,36 @@ function SearchIcon() {
 
 function WalletIcon() {
   return <Coins size={16} />;
+}
+
+type AppRoute = "home" | "dashboard";
+
+function routeFromPath(): AppRoute {
+  return window.location.pathname.replace(/\\/+$/, "") === "/dashboard" ? "dashboard" : "home";
+}
+
+function App() {
+  const [route, setRoute] = useState<AppRoute>(routeFromPath);
+
+  useEffect(() => {
+    function syncRoute() {
+      setRoute(routeFromPath());
+    }
+    window.addEventListener("popstate", syncRoute);
+    return () => window.removeEventListener("popstate", syncRoute);
+  }, []);
+
+  function navigateTo(nextRoute: AppRoute) {
+    const nextPath = nextRoute === "dashboard" ? "/dashboard" : "/";
+    if (window.location.pathname !== nextPath) {
+      window.history.pushState({ mintlineRoute: nextRoute }, "", nextPath);
+    }
+    setRoute(nextRoute);
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }
+
+  if (route === "home") return <HomePage onOpenDashboard={() => navigateTo("dashboard")} />;
+  return <Dashboard onGoHome={() => navigateTo("home")} />;
 }
 
 export default App;
