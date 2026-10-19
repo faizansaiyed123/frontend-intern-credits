@@ -302,14 +302,18 @@ function App() {
             <span className="brand-name">mintline<span>.</span></span>
             <span className="brand-subtitle">CREDIT WORKSPACE</span>
           </div>
-          <button
-            type="button"
-            className="icon-button sidebar-close"
-            aria-label="Close navigation"
-            onClick={() => setMobileNavOpen(false)}
-          >
-            <X size={18} />
-          </button>
+          {mobileNavOpen && (
+            <button
+              type="button"
+              className="icon-button sidebar-close"
+              aria-label="Close navigation"
+              aria-controls="primary-navigation"
+              aria-expanded={mobileNavOpen}
+              onClick={() => setMobileNavOpen(false)}
+            >
+              <X size={18} />
+            </button>
+          )}
         </div>
 
         <div className="workspace-label">WORKSPACE</div>
@@ -381,7 +385,7 @@ function App() {
                 className="icon-button mobile-menu"
                 aria-label="Open navigation"
                 aria-controls="primary-navigation"
-                aria-expanded={false}
+                aria-expanded={mobileNavOpen}
                 onClick={() => setMobileNavOpen(true)}
               >
                 <Menu size={20} />
