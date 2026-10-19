@@ -316,6 +316,17 @@ function Dashboard({ onGoHome }: { onGoHome: () => void }) {
         />
       )}
 
+      <button
+        type="button"
+        className={`mobile-nav-toggle ${mobileNavOpen ? "is-open" : ""}`}
+        aria-label={mobileNavOpen ? "Close navigation" : "Open navigation"}
+        aria-controls="primary-navigation"
+        aria-expanded={mobileNavOpen}
+        onClick={() => setMobileNavOpen((isOpen) => !isOpen)}
+      >
+        {mobileNavOpen ? <X size={20} /> : <Menu size={20} />}
+      </button>
+
       <aside className={`sidebar ${mobileNavOpen ? "sidebar-open" : ""}`}>
         <div className="brand-row">
           <div className="brand-mark"><Coins size={21} strokeWidth={2.2} /></div>
@@ -391,18 +402,9 @@ function Dashboard({ onGoHome }: { onGoHome: () => void }) {
       </aside>
 
       <main className="main-panel">
-        <header className={`topbar ${mobileNavOpen ? "topbar-nav-open" : ""}`}>
+        <header className="topbar">
           <div className="topbar-left">
-            <button
-              type="button"
-              className="icon-button mobile-menu"
-              aria-label={mobileNavOpen ? "Close navigation" : "Open navigation"}
-              aria-controls="primary-navigation"
-              aria-expanded={mobileNavOpen}
-              onClick={() => setMobileNavOpen((isOpen) => !isOpen)}
-            >
-              {mobileNavOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
+
             <div className="breadcrumb">
               <span>Workspace</span>
               <ChevronRight size={14} />
