@@ -1,12 +1,13 @@
 # Mintline — Credit Management Dashboard
 
-A responsive React + TypeScript dashboard for the [backend-intern-credits](https://github.com/faizansaiyed123/backend-intern-credits) FastAPI service. It uses the backend's real balance and administration endpoints; it does not invent account history or persist fake balances.
+A polished public homepage and responsive React + TypeScript dashboard for the [backend-intern-credits](https://github.com/faizansaiyed123/backend-intern-credits) FastAPI service. The homepage is served at `/`, and the operational dashboard is at `/dashboard`. The UI uses the backend's real balance and administration endpoints; it does not invent account history or persist fake balances.
 
 ## Features
 
 - Live account balance and last-updated timestamp from the API.
 - Add, deduct, and reset credit operations with input validation, loading states, and visible errors.
 - API reachability indicator and manual refresh.
+- A focused landing page explaining only the current API capabilities, with direct navigation to the dashboard.
 - Admin migration history and guarded migration submission, using an API key entered at runtime and kept only in component memory.
 - Responsive dashboard layout with accessible labels, keyboard-friendly forms, and empty/error states.
 
@@ -39,7 +40,7 @@ psql "${DATABASE_URL/+psycopg/}" -c "SELECT user_id, email, name FROM users WHER
 uvicorn src.main:app --reload
 ```
 
-The dashboard opens on user ID `1`. This backend does not expose user creation or a user directory endpoint, so that ID must already exist in the `users` table. Enter a different existing user ID in the dashboard header to switch accounts.
+The workspace opens at `/dashboard` on user ID `1`. This backend does not expose user creation or a user directory endpoint, so that ID must already exist in the `users` table. Enter a different existing user ID in the dashboard header to switch accounts. The Vercel rewrite configuration keeps `/dashboard` working on direct visits and page refreshes.
 
 ## CORS
 
