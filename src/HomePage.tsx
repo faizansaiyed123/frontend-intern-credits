@@ -1,6 +1,6 @@
 import {
   ArrowDownLeft, ArrowRight, ArrowUpRight, Check, ChevronRight, Coins,
-  Database, Github, LockKeyhole, Plus, RotateCcw, ShieldCheck, Zap,
+  Database, ExternalLink, LockKeyhole, Plus, RotateCcw, ShieldCheck, Zap,
 } from "lucide-react";
 import "./home.css";
 
@@ -56,7 +56,7 @@ export default function HomePage({ onOpenDashboard }: HomePageProps) {
                   Open credit dashboard <ArrowRight size={17} />
                 </button>
                 <a className="home-secondary-cta" href="https://github.com/faizansaiyed123/backend-intern-credits" target="_blank" rel="noreferrer">
-                  Explore the backend <Github size={16} />
+                  Explore the backend <ExternalLink size={16} />
                 </a>
               </div>
               <div className="home-stack-note">
