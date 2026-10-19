@@ -111,6 +111,7 @@ function App() {
   const [migrationName, setMigrationName] = useState("");
   const [migrationSql, setMigrationSql] = useState("");
   const [confirmSql, setConfirmSql] = useState(false);
+  const [confirmReset, setConfirmReset] = useState(false);
   const [applyLoading, setApplyLoading] = useState(false);
   const [adminNotice, setAdminNotice] = useState("");
 
@@ -175,6 +176,7 @@ function App() {
   function startOperation(operation: CreditOperation) {
     setOperationError("");
     setAmount("25");
+    setConfirmReset(false);
     setActiveOperation(operation);
   }
 
@@ -469,7 +471,6 @@ function App() {
                   <input
                     id="user-id"
                     inputMode="numeric"
-                    pattern="[0-9]*"
                     value={draftUserId}
                     onChange={(event) => setDraftUserId(event.target.value)}
                     placeholder="Enter user ID"
@@ -571,6 +572,13 @@ function App() {
                       <div className="snapshot-copy">
                         <span>Scheduled credit top-up</span>
                         <strong>+5 credits per day*</strong>
+                      </div>
+                    </div>
+                    <div className="snapshot-row">
+                      <span className="snapshot-icon icon-lavender"><Coins size={17} /></span>
+                      <div className="snapshot-copy">
+                        <span>Added in this session</span>
+                        <strong>+{formatCredits(sessionAdded)} credits</strong>
                       </div>
                     </div>
                   </div>
@@ -848,6 +856,7 @@ function App() {
             <button type="button" className="icon-button modal-close" onClick={() => setActiveOperation(null)} aria-label="Close dialog" disabled={operationLoading}>
               <X size={18} />
             </button>
+            <form onSubmit={submitOperation}>
             <span className="card-kicker">USER #{activeUserId}</span>
             <h2 id="operation-modal-title">{operationTitle(activeOperation)}</h2>
             <p className="modal-description">
@@ -887,18 +896,17 @@ function App() {
             )}
             {activeOperation === "reset" && (
               <label className="confirm-line reset-confirm">
-                <input type="checkbox" checked={confirmSql} onChange={(event) => setConfirmSql(event.target.checked)} />
+                <input type="checkbox" checked={confirmReset} onChange={(event) => setConfirmReset(event.target.checked)} />
                 <span>I understand the current balance will be cleared.</span>
               </label>
             )}
             {operationError && <div className="inline-error modal-error" role="alert"><CircleAlert size={16} />{operationError}</div>}
-            <form onSubmit={submitOperation}>
               <div className="modal-actions">
                 <button type="button" className="button button-secondary" onClick={() => setActiveOperation(null)} disabled={operationLoading}>Cancel</button>
                 <button
                   type="submit"
                   className={`button ${activeOperation === "reset" ? "button-danger" : "button-dark"}`}
-                  disabled={operationLoading || (activeOperation === "reset" && !confirmSql)}
+                  disabled={operationLoading || (activeOperation === "reset" && !confirmReset)}
                 >
                   {operationLoading ? <LoaderCircle className="spin" size={16} /> : activeOperation === "add" ? <Plus size={16} /> : activeOperation === "deduct" ? <ArrowDownLeft size={16} /> : <RotateCcw size={16} />}
                   {operationLoading ? "Applying…" : activeOperation === "reset" ? "Reset balance" : `Confirm ${activeOperation === "add" ? "addition" : "deduction"}`}
