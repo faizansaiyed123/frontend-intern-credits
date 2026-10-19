@@ -6,7 +6,6 @@ A responsive React + TypeScript dashboard for the [backend-intern-credits](https
 
 - Live account balance and last-updated timestamp from the API.
 - Add, deduct, and reset credit operations with input validation, loading states, and visible errors.
-- Session-only activity feed for actions performed in the current browser session (the backend currently has no transaction-history endpoint).
 - API reachability indicator and manual refresh.
 - Admin migration history and guarded migration submission, using an API key entered at runtime and kept only in component memory.
 - Responsive dashboard layout with accessible labels, keyboard-friendly forms, and empty/error states.
