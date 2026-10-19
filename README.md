@@ -13,7 +13,7 @@ A responsive React + TypeScript dashboard for the [backend-intern-credits](https
 
 ## Run locally
 
-Prerequisites: Node.js 20+ and the backend service with its PostgreSQL schema configured.
+Prerequisites: Node.js 22.12+ and the backend service with its PostgreSQL schema configured.
 
 ```bash
 npm install
@@ -23,10 +23,16 @@ npm run dev
 
 By default the frontend calls `http://localhost:8000`. Set `VITE_API_BASE_URL` in `.env` if the backend runs elsewhere. Environment variables prefixed with `VITE_` are public browser configuration; **never put API keys or other secrets in them**.
 
-Run the backend from its repository with a configured `.env` and schema:
+Run the backend from its repository root with a configured `.env` and schema:
 
 ```bash
+cd backend-intern-credits
+python -m venv .venv
+source .venv/bin/activate
 pip install -r src/requirements.txt
+cp .env.example .env
+# Edit .env, then load values into this shell for psql:
+set -a && source .env && set +a
 psql "$DATABASE_URL" -f schema.sql
 uvicorn src.main:app --reload
 ```
