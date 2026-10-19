@@ -119,14 +119,14 @@ function App() {
   const loadAccount = useCallback(async (userId: number) => {
     setAccountLoading(true);
     setAccountError("");
+    setAccount(null);
+    setActiveUserId(userId);
+    setDraftUserId(String(userId));
     try {
       const nextAccount = await getCredits(userId);
       setAccount(nextAccount);
-      setActiveUserId(userId);
-      setDraftUserId(String(userId));
       setApiState("online");
     } catch (error) {
-      setAccount(null);
       setAccountError(getErrorMessage(error));
       setApiState(error instanceof ApiError && error.status ? "online" : "offline");
     } finally {
@@ -491,7 +491,9 @@ function App() {
                     <p>
                       {apiState === "offline"
                         ? "Start the FastAPI backend and confirm VITE_API_BASE_URL and CORS_ORIGINS."
-                        : "This API does not create users. Enter an ID that already exists in the backend users table."}
+                        : accountError.toLowerCase().includes("user not found")
+                          ? "This API does not create users. Enter an ID that already exists in the backend users table."
+                          : "The API responded but could not load this account. Check the error above and the backend logs."}
                     </p>
                   </div>
                   <button
