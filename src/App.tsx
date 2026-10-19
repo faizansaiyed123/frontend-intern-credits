@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import {
-  Activity,
   ArrowDownLeft,
   ArrowRight,
   ArrowUpRight,
@@ -9,11 +8,9 @@ import {
   ChevronRight,
   CircleAlert,
   CircleCheck,
-  Clock3,
   Coins,
   Database,
   ExternalLink,
-  FileClock,
   Gauge,
   LayoutDashboard,
   LoaderCircle,
@@ -43,7 +40,6 @@ import type {
   CreditAccount,
   CreditOperation,
   SchemaMigration,
-  SessionActivity,
 } from "./types";
 
 type Page = "overview" | "admin";
@@ -69,14 +65,6 @@ function formatTimestamp(value?: string): string {
   }).format(date);
 }
 
-function formatTime(value: string): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Just now";
-  return new Intl.DateTimeFormat("en-IN", {
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
-}
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
@@ -103,7 +91,6 @@ function App() {
   const [operationLoading, setOperationLoading] = useState(false);
   const [operationError, setOperationError] = useState("");
   const [notice, setNotice] = useState<Notice | null>(null);
-  const [activities, setActivities] = useState<SessionActivity[]>([]);
 
   const [adminKey, setAdminKey] = useState("");
   const [migrations, setMigrations] = useState<SchemaMigration[] | null>(null);
@@ -148,15 +135,6 @@ function App() {
     void checkApi();
     void loadAccount(1);
   }, [checkApi, loadAccount]);
-
-  const lastActivity = activities[0];
-  const sessionAdded = useMemo(
-    () =>
-      activities
-        .filter((item) => item.userId === activeUserId && item.operation === "add")
-        .reduce((sum, item) => sum + item.amount, 0),
-    [activities, activeUserId],
-  );
 
   function showNotice(kind: Notice["kind"], text: string) {
     setNotice({ kind, text });
@@ -208,19 +186,8 @@ function App() {
         updated = await resetCredits(activeUserId);
       }
 
-      const recordedAmount = activeOperation === "reset" ? account.credits : parsedAmount;
-      const activity: SessionActivity = {
-        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        userId: activeUserId,
-        operation: activeOperation,
-        amount: recordedAmount,
-        balanceAfter: updated.credits,
-        createdAt: new Date().toISOString(),
-      };
-
       setAccount(updated);
       setApiState("online");
-      setActivities((current) => [activity, ...current].slice(0, 8));
       setActiveOperation(null);
       showNotice(
         "success",
@@ -546,148 +513,61 @@ function App() {
                   </div>
                 </article>
 
-                <article className="snapshot-card">
+                <article className="operations-panel">
                   <div className="section-card-header">
                     <div>
-                      <span className="card-kicker">AT A GLANCE</span>
-                      <h2>Account snapshot</h2>
+                      <span className="card-kicker">CREDIT OPERATIONS</span>
+                      <h2>Manage balance</h2>
+                      <p className="operations-intro">Choose an action for account #{activeUserId}.</p>
                     </div>
-                    <span className="snapshot-badge"><Activity size={15} /></span>
+                    <span className="snapshot-badge"><Coins size={16} /></span>
                   </div>
-                  <div className="snapshot-list">
-                    <div className="snapshot-row">
-                      <span className="snapshot-icon icon-lavender"><Clock3 size={17} /></span>
-                      <div className="snapshot-copy">
-                        <span>Last balance update</span>
-                        <strong>{account ? formatTimestamp(account.last_updated) : "Waiting for account"}</strong>
-                      </div>
-                    </div>
-                    <div className="snapshot-row">
-                      <span className="snapshot-icon icon-mint"><ShieldCheck size={17} /></span>
-                      <div className="snapshot-copy">
-                        <span>Balance protection</span>
-                        <strong>Negative balances blocked</strong>
-                      </div>
-                      <Check className="row-check" size={16} />
-                    </div>
-                    <div className="snapshot-row">
-                      <span className="snapshot-icon icon-peach"><Zap size={17} /></span>
-                      <div className="snapshot-copy">
-                        <span>Scheduled credit top-up</span>
-                        <strong>+5 credits per day*</strong>
-                      </div>
-                    </div>
-                    <div className="snapshot-row">
-                      <span className="snapshot-icon icon-lavender"><Coins size={17} /></span>
-                      <div className="snapshot-copy">
-                        <span>Added in this session</span>
-                        <strong>+{formatCredits(sessionAdded)} credits</strong>
-                      </div>
-                    </div>
+                  <div className="actions-grid">
+                    <button
+                      type="button"
+                      className="operation-card operation-add"
+                      onClick={() => startOperation("add")}
+                      disabled={!account || accountLoading}
+                    >
+                      <span className="operation-icon"><Plus size={19} /></span>
+                      <span className="operation-copy">
+                        <strong>Add credits</strong>
+                        <span>Increase the available balance</span>
+                      </span>
+                      <span className="operation-arrow"><ArrowUpRight size={17} /></span>
+                    </button>
+                    <button
+                      type="button"
+                      className="operation-card operation-deduct"
+                      onClick={() => startOperation("deduct")}
+                      disabled={!account || accountLoading}
+                    >
+                      <span className="operation-icon"><ArrowDownLeft size={19} /></span>
+                      <span className="operation-copy">
+                        <strong>Deduct credits</strong>
+                        <span>Subtract from available credits</span>
+                      </span>
+                      <span className="operation-arrow"><ArrowUpRight size={17} /></span>
+                    </button>
+                    <button
+                      type="button"
+                      className="operation-card operation-reset"
+                      onClick={() => startOperation("reset")}
+                      disabled={!account || accountLoading}
+                    >
+                      <span className="operation-icon"><RotateCcw size={18} /></span>
+                      <span className="operation-copy">
+                        <strong>Reset balance</strong>
+                        <span>Set the balance to zero</span>
+                      </span>
+                      <span className="operation-arrow"><ArrowUpRight size={17} /></span>
+                    </button>
                   </div>
-                  <p className="snapshot-footnote">*Requires the backend scheduler or external daily job to be enabled.</p>
+                  <div className="operations-note">
+                    <ShieldCheck size={15} />
+                    <span>Changes are applied by the connected API. Deduction cannot exceed the current balance.</span>
+                  </div>
                 </article>
-              </section>
-
-              <section className="section-block">
-                <div className="section-heading">
-                  <div>
-                    <div className="eyebrow eyebrow-quiet">TAKE ACTION</div>
-                    <h2>Manage credits</h2>
-                    <p>Changes are applied to the selected account through the live API.</p>
-                  </div>
-                  <span className="section-number">01 <span>/ OPERATIONS</span></span>
-                </div>
-
-                <div className="actions-grid">
-                  <button
-                    type="button"
-                    className="operation-card operation-add"
-                    onClick={() => startOperation("add")}
-                    disabled={!account || accountLoading}
-                  >
-                    <span className="operation-icon"><Plus size={20} /></span>
-                    <span className="operation-copy">
-                      <strong>Add credits</strong>
-                      <span>Increase this account's balance</span>
-                    </span>
-                    <span className="operation-arrow"><ArrowUpRight size={18} /></span>
-                  </button>
-                  <button
-                    type="button"
-                    className="operation-card operation-deduct"
-                    onClick={() => startOperation("deduct")}
-                    disabled={!account || accountLoading}
-                  >
-                    <span className="operation-icon"><ArrowDownLeft size={20} /></span>
-                    <span className="operation-copy">
-                      <strong>Deduct credits</strong>
-                      <span>Subtract from available credits</span>
-                    </span>
-                    <span className="operation-arrow"><ArrowUpRight size={18} /></span>
-                  </button>
-                  <button
-                    type="button"
-                    className="operation-card operation-reset"
-                    onClick={() => startOperation("reset")}
-                    disabled={!account || accountLoading}
-                  >
-                    <span className="operation-icon"><RotateCcw size={19} /></span>
-                    <span className="operation-copy">
-                      <strong>Reset balance</strong>
-                      <span>Set the balance back to zero</span>
-                    </span>
-                    <span className="operation-arrow"><ArrowUpRight size={18} /></span>
-                  </button>
-                </div>
-              </section>
-
-              <section className="section-block activity-block">
-                <div className="section-heading activity-heading">
-                  <div>
-                    <div className="eyebrow eyebrow-quiet">WHAT'S HAPPENED</div>
-                    <h2>Recent session activity</h2>
-                    <p>Only actions performed in this open browser tab are shown here.</p>
-                  </div>
-                  <span className="activity-count">{activities.filter((item) => item.userId === activeUserId).length} events</span>
-                </div>
-
-                <div className="activity-card">
-                  {activities.filter((item) => item.userId === activeUserId).length === 0 ? (
-                    <div className="empty-activity">
-                      <div className="empty-activity-icon"><FileClock size={22} /></div>
-                      <strong>Your activity starts here</strong>
-                      <p>When you add, deduct, or reset credits, the action will appear in this session feed.</p>
-                      <button type="button" className="text-action" onClick={() => startOperation("add") } disabled={!account}>
-                        Make your first change <ArrowRight size={15} />
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="activity-list">
-                      {activities.filter((item) => item.userId === activeUserId).map((item) => (
-                        <div className="activity-row" key={item.id}>
-                          <div className={`activity-operation-icon activity-${item.operation}`}>
-                            {item.operation === "add" ? <ArrowUpRight size={17} /> : item.operation === "deduct" ? <ArrowDownLeft size={17} /> : <RotateCcw size={16} />}
-                          </div>
-                          <div className="activity-description">
-                            <strong>{operationTitle(item.operation)}</strong>
-                            <span>User #{item.userId} · {formatTime(item.createdAt)}</span>
-                          </div>
-                          <div className="activity-result">
-                            <strong className={item.operation === "add" ? "text-positive" : item.operation === "deduct" ? "text-negative" : ""}>
-                              {item.operation === "reset" ? "Reset" : `${item.operation === "add" ? "+" : "−"}${formatCredits(item.amount)}`}
-                            </strong>
-                            <span>{formatCredits(item.balanceAfter)} balance</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  <div className="activity-card-footer">
-                    <span><LockKeyhole size={13} /> Session-only record</span>
-                    {lastActivity && <span>Last change at {formatTime(lastActivity.createdAt)}</span>}
-                  </div>
-                </div>
               </section>
 
               <footer className="page-footer">
