@@ -22,6 +22,7 @@ import {
   Plus,
   RefreshCw,
   RotateCcw,
+  Search,
   ShieldCheck,
   Sparkles,
   X,
@@ -921,7 +922,7 @@ function App() {
 }
 
 function SearchIcon() {
-  return <Activity size={16} />;
+  return <Search size={16} />;
 }
 
 function WalletIcon() {
