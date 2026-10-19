@@ -620,3 +620,84 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
+
+/* Focused dashboard refinement: only controls backed by the live API. */
+.operations-panel {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: 23px;
+  border: 1px solid #e5ece7;
+  border-radius: 16px;
+  background:
+    radial-gradient(ellipse at 100% 0%, rgba(214, 242, 226, 0.22), transparent 34%),
+    #ffffff;
+  box-shadow: var(--shadow-soft);
+}
+.operations-panel .section-card-header h2 {
+  font-size: 17px;
+  letter-spacing: -0.55px;
+}
+.operations-intro {
+  margin: 7px 0 0;
+  color: #89978f;
+  font-size: 10px;
+  line-height: 1.55;
+}
+.operations-panel .actions-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 9px;
+  margin-top: 22px;
+}
+.operations-panel .operation-card {
+  min-height: 58px;
+  padding: 9px 11px;
+  border-color: #edf1ee;
+  border-radius: 11px;
+  box-shadow: none;
+  background: rgba(255, 255, 255, 0.94);
+}
+.operations-panel .operation-card:hover:not(:disabled) {
+  border-color: #cfe5d8;
+  background: #fbfefc;
+  box-shadow: 0 7px 18px rgba(29, 56, 49, 0.045);
+}
+.operations-panel .operation-icon {
+  flex-basis: 36px;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+}
+.operations-panel .operation-copy strong { font-size: 10px; }
+.operations-panel .operation-copy span { font-size: 9px; }
+.operations-panel .operation-arrow {
+  display: grid;
+  flex: 0 0 26px;
+  width: 26px;
+  height: 26px;
+}
+.operations-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 16px;
+  color: #81948a;
+  font-size: 9px;
+  line-height: 1.6;
+}
+.operations-note svg { flex: 0 0 auto; margin-top: 1px; color: #519275; }
+@media (max-width: 1100px) {
+  .operations-panel .actions-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .operations-panel .operation-card { min-height: 78px; padding: 11px; }
+  .operations-panel .operation-arrow { display: none; }
+  .operations-note { margin-top: 17px; }
+}
+@media (max-width: 640px) {
+  .operations-panel { padding: 19px 17px 16px; }
+  .operations-panel .actions-grid { grid-template-columns: minmax(0, 1fr); gap: 9px; margin-top: 18px; }
+  .operations-panel .operation-card { min-height: 58px; padding: 10px 11px; }
+  .operations-panel .operation-arrow { display: grid; }
+  .operations-note { margin-top: 14px; padding-top: 12px; }
+}
