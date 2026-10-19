@@ -136,6 +136,17 @@ function App() {
     void loadAccount(1);
   }, [checkApi, loadAccount]);
 
+  useEffect(() => {
+    if (!mobileNavOpen) return;
+
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setMobileNavOpen(false);
+    }
+
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [mobileNavOpen]);
+
   function showNotice(kind: Notice["kind"], text: string) {
     setNotice({ kind, text });
   }
@@ -302,7 +313,7 @@ function App() {
         </div>
 
         <div className="workspace-label">WORKSPACE</div>
-        <nav className="main-nav" aria-label="Main navigation">
+        <nav id="primary-navigation" className="main-nav" aria-label="Main navigation">
           <button
             type="button"
             className={`nav-link ${page === "overview" ? "active" : ""}`}
@@ -364,14 +375,18 @@ function App() {
       <main className="main-panel">
         <header className="topbar">
           <div className="topbar-left">
-            <button
-              type="button"
-              className="icon-button mobile-menu"
-              aria-label="Open navigation"
-              onClick={() => setMobileNavOpen(true)}
-            >
-              <Menu size={20} />
-            </button>
+            {!mobileNavOpen && (
+              <button
+                type="button"
+                className="icon-button mobile-menu"
+                aria-label="Open navigation"
+                aria-controls="primary-navigation"
+                aria-expanded={false}
+                onClick={() => setMobileNavOpen(true)}
+              >
+                <Menu size={20} />
+              </button>
+            )}
             <div className="breadcrumb">
               <span>Workspace</span>
               <ChevronRight size={14} />
