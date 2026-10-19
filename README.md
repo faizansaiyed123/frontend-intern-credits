@@ -33,7 +33,7 @@ pip install -r src/requirements.txt
 cp .env.example .env
 # Edit .env, then load values into this shell for psql:
 set -a && source .env && set +a
-psql "$DATABASE_URL" -f schema.sql
+psql "${DATABASE_URL/+psycopg/}" -f schema.sql
 uvicorn src.main:app --reload
 ```
 
