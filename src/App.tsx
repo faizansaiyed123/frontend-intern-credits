@@ -644,7 +644,7 @@ function App() {
                   </div>
                 ) : migrations.length === 0 ? (
                   <div className="admin-empty">
-                    <div className="empty-activity-icon"><FileClock size={21} /></div>
+                    <div className="empty-activity-icon"><Database size={21} /></div>
                     <strong>No migrations recorded yet</strong>
                     <p>When the backend records a schema migration, it will be listed here.</p>
                   </div>
