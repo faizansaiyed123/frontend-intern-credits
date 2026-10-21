@@ -54,7 +54,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   border: 0;
 }
 
-/* Sidebar */
 .sidebar {
   position: fixed;
   z-index: 30;
@@ -196,7 +195,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .footer-status { display: flex; color: #7ad5aa; }
 .mobile-nav-toggle, .mobile-scrim { display: none; }
 
-/* Main layout */
 .main-panel { min-height: 100vh; margin-left: 252px; }
 .topbar {
   position: sticky;
@@ -265,7 +263,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .button-danger { color: #fff; background: #bd514e; box-shadow: 0 4px 10px rgba(189, 81, 78, 0.1); }
 .button-danger:hover:not(:disabled) { background: #a83f3d; }
 
-/* Account lookup */
 .toolbar-card {
   display: flex;
   align-items: center;
@@ -291,7 +288,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .user-search-form { border: 1px solid #e6ece8; border-radius: 9px; background: #fbfcfc; }
 .user-search-form .button { margin-right: 4px; }
 
-/* Status banners */
 .error-banner { display: flex; align-items: flex-start; gap: 13px; margin: 0 0 21px; padding: 14px 15px; border: 1px solid #f0d7d5; border-radius: 12px; background: #fffafa; }
 .error-banner-icon { display: grid; place-items: center; flex: 0 0 31px; height: 31px; border-radius: 9px; color: #b95c57; background: #fbe9e8; }
 .error-banner > div:nth-child(2) { min-width: 0; flex: 1; padding-top: 1px; }
@@ -303,7 +299,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .toast-error { color: #aa4b47; border-color: #f1d8d6; background: #fff8f7; }
 .toast-close { display: grid; place-items: center; margin-left: auto; padding: 2px; border: 0; color: inherit; background: transparent; opacity: 0.75; }
 
-/* Overview cards */
 .overview-grid { display: grid; grid-template-columns: minmax(0, 1.18fr) minmax(310px, 0.82fr); gap: 18px; }
 .balance-card {
   position: relative;
@@ -348,7 +343,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .section-card-header h2, .admin-card-heading h2, .admin-section-heading h2 { margin: 7px 0 0; color: #21372f; font-family: "Manrope", sans-serif; font-size: 16px; font-weight: 800; letter-spacing: -0.45px; }
 .snapshot-badge { display: grid; place-items: center; width: 33px; height: 33px; border-radius: 10px; color: #31775e; background: #edf9f2; }
 
-/* Operations */
 .eyebrow-quiet { color: #81958b; font-size: 8px; letter-spacing: 1.45px; }
 .actions-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 13px; }
 .operation-card { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 16px 15px; border: 1px solid #e8eeea; border-radius: 13px; color: var(--ink); background: #fff; text-align: left; box-shadow: var(--shadow-soft); transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease; }
@@ -363,7 +357,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .operation-arrow { display: grid; place-items: center; flex: 0 0 27px; width: 27px; height: 27px; margin-left: auto; border: 1px solid #edf1ee; border-radius: 8px; color: #91a097; background: #fbfcfb; }
 .operation-card:hover .operation-arrow { color: #347a60; border-color: #d5eade; background: #f3fbf6; }
 
-/* Activity table */
 .history-count { display: inline-flex; align-items: center; min-height: 26px; padding: 0 10px; border: 1px solid #e7ede9; border-radius: 7px; color: #71857a; background: #fff; font-size: 9px; font-weight: 700; }
 .admin-empty { display: flex; align-items: center; flex-direction: column; padding: 34px 20px 30px; text-align: center; }
 .admin-empty > strong { color: #3a5045; font-family: "Manrope", sans-serif; font-size: 12px; font-weight: 800; }
@@ -375,7 +368,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .page-footer a { display: inline-flex; align-items: center; gap: 6px; color: #70877b; font-weight: 600; }
 .page-footer a:hover { color: #2e8060; }
 
-/* Admin screen */
 .admin-page .page-heading { margin-bottom: 27px; }
 .admin-heading-icon { display: grid; place-items: center; width: 47px; height: 47px; border: 1px solid #dbece3; border-radius: 14px; color: #33795e; background: #ebf8f0; }
 .security-banner { display: flex; align-items: flex-start; gap: 13px; margin-bottom: 19px; padding: 16px 18px; border: 1px solid #f2d8b4; border-radius: 12px; background: #fffaf0; }
@@ -436,7 +428,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .migration-submit-row > span { display: inline-flex; align-items: center; gap: 7px; color: #a1765d; font-size: 9px; }
 .migration-submit-row > span svg { flex: 0 0 auto; }
 
-/* Modal */
 .modal-backdrop { position: fixed; z-index: 80; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(14, 37, 31, 0.49); backdrop-filter: blur(5px); animation: fade-in 140ms ease-out; }
 .operation-modal { position: relative; width: min(100%, 440px); padding: 29px; border: 1px solid rgba(255,255,255,0.7); border-radius: 18px; background: #fff; box-shadow: 0 28px 90px rgba(9, 34, 26, 0.24); animation: modal-in 180ms ease-out; }
 .modal-symbol { display: grid; place-items: center; width: 47px; height: 47px; margin-bottom: 22px; border-radius: 14px; }
@@ -460,7 +451,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .modal-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 24px; padding-top: 17px; border-top: 1px solid #eef2ef; }
 .modal-actions .button { min-height: 39px; }
 
-/* Motion */
 .spin { animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
@@ -468,7 +458,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes modal-in { from { opacity: 0; transform: translateY(7px) scale(0.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
-/* Responsive */
 @media (max-width: 1320px) {
   .topbar { padding: 0 32px; }
   .content-wrap { padding: 32px 32px 24px; }
@@ -604,7 +593,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
 
-/* Focused dashboard refinement: only controls backed by the live API. */
 .operations-panel {
   display: flex;
   min-width: 0;
