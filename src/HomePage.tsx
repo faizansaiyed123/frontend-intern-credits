@@ -171,7 +171,7 @@ export default function HomePage({ onOpenDashboard }: HomePageProps) {
       <footer className="home-footer">
         <Brand />
         <span>Credit management, made clear.</span>
-        <a href="https:
+        <a href="https://github.com/faizansaiyed123/backend-intern-credits" target="_blank" rel="noreferrer">Backend source <ChevronRight size={14} /></a>
         <span className="home-footer-copyright">© 2026 Mintline</span>
       </footer>
     </div>
