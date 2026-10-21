@@ -369,7 +369,7 @@ function Dashboard({ onGoHome }: { onGoHome: () => void }) {
           <span className={`status-dot ${apiState}`} />
           <div className="connection-copy">
             <strong>{apiStatusLabel}</strong>
-            <span>{API_BASE_URL.replace(/^https?:\/\
+            <span>{API_BASE_URL.replace(/^https?:\/\//, "")}</span>
           </div>
           <button
             type="button"
