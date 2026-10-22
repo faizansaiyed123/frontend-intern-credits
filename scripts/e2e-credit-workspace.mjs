@@ -95,7 +95,7 @@ async function writeReports(status, reason) {
   const home = captured.find((item) => item[0] === "01-homepage.png");
   const sections = [
     ["Live account and credit operations", captured.filter((item) => /^0[2-8]-/.test(item[0]))],
-    ["Backend errors and administration", captured.filter((item) => /^0[9-12]-/.test(item[0]))],
+    ["Backend errors and administration", captured.filter((item) => /^(09|10|11|12)-/.test(item[0]))],
     ["Responsive mobile view", captured.filter((item) => /^1[34]-/.test(item[0]))]
   ];
   const lines = [
