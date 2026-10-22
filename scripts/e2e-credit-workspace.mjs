@@ -353,7 +353,7 @@ async function run() {
     await page.getByRole("button", { name: /Admin & migrations/i }).click();
     await page.locator("#admin-key").fill("incorrect-e2e-key");
     await page.getByRole("button", { name: /Load migration history/i }).click();
-    await page.locator(".inline-error").filter({ hasText: "Unauthorized" }).waitFor({ state: "visible" });
+    await page.locator(".inline-error").filter({ hasText: "Unauthorized" }).first().waitFor({ state: "visible" });
     expectApi("GET", "/api/schema/migrations", 401);
     await takeScreenshot(page, "10-admin-unauthorized.png");
     return "GET /api/schema/migrations with bad key = 401";
