@@ -71,11 +71,11 @@ jobs:
           echo "::add-mask::$key"
           echo "ADMIN_API_KEY=$key" >> "$GITHUB_ENV"
 
-      - name: Install frontend packages and Playwright Chromium
+      - name: Install frontend packages and verify hosted Chrome
         run: |
           npm install
           npm install --no-save playwright
-          npx playwright install --with-deps chromium
+          google-chrome --version
 
       - name: Build the production frontend
         run: npm run build
