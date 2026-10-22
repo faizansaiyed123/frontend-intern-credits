@@ -2,6 +2,10 @@
 
 A polished public homepage and responsive React + TypeScript dashboard for the [backend-intern-credits](https://github.com/faizansaiyed123/backend-intern-credits) FastAPI service. The homepage is served at `/`, and the operational dashboard is at `/dashboard`. The UI uses the backend's real balance and administration endpoints; it does not invent account history or persist fake balances.
 
+## Product walkthrough
+
+Explore the [Mintline visual walkthrough](visual.md) for the homepage, account overview, credit operations, migration history, and mobile experience.
+
 ## Features
 
 - Live account balance and last-updated timestamp from the API.
