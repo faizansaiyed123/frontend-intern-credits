@@ -1,0 +1,468 @@
+import assert from "node:assert/strict";
+import { execFileSync, spawnSync } from "node:child_process";
+import fs from "node:fs/promises";
+import path from "node:path";
+import { chromium } from "playwright";
+
+const root = process.cwd();
+const backendRoot = path.join(root, "backend", "backend-intern-credits");
+const screenshotsDir = path.join(root, "docs", "testing", "visuals");
+const docsDir = path.join(root, "docs", "testing");
+const baseUrl = process.env.E2E_BASE_URL || "http://127.0.0.1:4173";
+const apiBaseUrl = (process.env.VITE_API_BASE_URL || "http://127.0.0.1:8000").replace(/\/+$/, "");
+const apiOrigin = new URL(apiBaseUrl).origin;
+const adminKey = process.env.ADMIN_API_KEY;
+const psqlUrl = process.env.PSQL_URL;
+const startedAt = new Date().toISOString();
+const checks = [];
+const apiRequests = [];
+const directApiChecks = [];
+const dbChecks = [];
+const browserErrors = [];
+const capturedScreenshots = [];
+let browser;
+let fatalError;
+
+const catalog = [
+  ["01-homepage.png", "Public homepage", "The homepage explains the API-backed capabilities and leads into the workspace."],
+  ["02-dashboard-initial-balance.png", "Live account balance", "The selected account balance and last-updated timestamp are loaded from FastAPI and PostgreSQL."],
+  ["03-add-credit-dialog.png", "Add credits", "The operation dialog accepts an amount before submitting the real add-credit API request."],
+  ["04-after-add-credit.png", "Persisted credit addition", "After POST /api/credits/1/add, the UI and a direct PostgreSQL query both report 145."],
+  ["05-deduct-credit-dialog.png", "Deduct credits", "The deduction dialog shows the available balance before the real backend mutation."],
+  ["06-after-deduct-credit.png", "Persisted credit deduction", "After POST /api/credits/1/deduct, the UI and database both report 105."],
+  ["07-reset-confirmation.png", "Reset confirmation", "Reset requires explicit confirmation before the frontend sends PATCH /api/credits/1/reset."],
+  ["08-after-reset.png", "Reset persisted", "The balance becomes zero through the backend endpoint and is verified directly in PostgreSQL."],
+  ["09-user-not-found.png", "Backend error handling", "A missing account displays the actual API 404 response as a user-facing error."],
+  ["10-admin-unauthorized.png", "Admin authentication guard", "The frontend sends an incorrect API key and displays the backend's real 401 response."],
+  ["11-admin-migration-history.png", "Migration history", "With a valid runtime-only key, the frontend reads migration records from PostgreSQL through the API."],
+  ["12-admin-migration-applied.png", "Migration applied", "A harmless test-only index is submitted in the browser and independently verified in PostgreSQL."],
+  ["13-mobile-dashboard.png", "Mobile dashboard", "The production-built dashboard renders at a narrow viewport and still loads its account through the API."],
+  ["14-mobile-navigation.png", "Mobile navigation", "The responsive navigation opens on mobile while the workspace remains API-backed."]
+];
+
+function sqlValue(sql) {
+  if (!psqlUrl) throw new Error("PSQL_URL is required for direct PostgreSQL verification.");
+  return execFileSync("psql", [psqlUrl, "-X", "-q", "-A", "-t", "-v", "ON_ERROR_STOP=1", "-c", sql], {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"]
+  }).trim();
+}
+
+function pass(name, evidence) {
+  checks.push({ name, status: "passed", evidence: evidence || "" });
+  console.log("PASS: " + name + (evidence ? " — " + evidence : ""));
+}
+
+async function verify(name, action) {
+  try {
+    const evidence = await action();
+    pass(name, evidence);
+  } catch (error) {
+    checks.push({ name, status: "failed", evidence: String(error && error.message ? error.message : error) });
+    throw error;
+  }
+}
+
+function expectApi(method, route, status) {
+  const found = apiRequests.find((item) => item.method === method && item.path === route && item.status === status);
+  assert.ok(found, "Expected browser HTTP request " + method + " " + route + " with status " + status +
+    ". Observed: " + JSON.stringify(apiRequests.map((item) => ({ method: item.method, path: item.path, status: item.status }))));
+}
+
+async function takeScreenshot(page, file) {
+  await fs.mkdir(screenshotsDir, { recursive: true });
+  await page.screenshot({ path: path.join(screenshotsDir, file), fullPage: true, animations: "disabled" });
+  if (!capturedScreenshots.includes(file)) capturedScreenshots.push(file);
+}
+
+async function waitForBalance(page, expected) {
+  await page.waitForFunction((wanted) => {
+    const element = document.querySelector(".balance-number");
+    if (!element) return false;
+    return (element.textContent || "").replace(/,/g, "").trim() === String(wanted);
+  }, expected, { timeout: 15000 });
+}
+
+async function assertDatabaseBalance(expected, label) {
+  const actual = sqlValue("SELECT credits FROM credits WHERE user_id = 1;");
+  assert.equal(actual, String(expected), label + " — PostgreSQL returned " + actual + ".");
+  dbChecks.push({ check: label, status: "passed", query: "SELECT credits FROM credits WHERE user_id = 1", expected: String(expected), actual });
+}
+
+async function writeReports(status, reason) {
+  await fs.mkdir(docsDir, { recursive: true });
+  const captured = catalog.filter((item) => capturedScreenshots.includes(item[0]));
+  const home = captured.find((item) => item[0] === "01-homepage.png");
+  const sections = [
+    ["Live account and credit operations", captured.filter((item) => /^0[2-8]-/.test(item[0]))],
+    ["Backend errors and administration", captured.filter((item) => /^0[9-12]-/.test(item[0]))],
+    ["Responsive mobile view", captured.filter((item) => /^1[34]-/.test(item[0]))]
+  ];
+  const lines = [
+    "# Mintline — verified end-to-end walkthrough",
+    "",
+    "Generated from the integrated browser/API/database workflow on " + startedAt + ".",
+    "",
+    "**Integration model:** a production-built React frontend makes real HTTP requests from Chromium to the repository's FastAPI backend; PostgreSQL is the backend's actual database. The run observes response codes and queries PostgreSQL after mutations. It does not mock or intercept API routes.",
+    "",
+    "**Data boundary:** a disposable PostgreSQL instance and synthetic, test-only users are used. This workflow does not connect to production or use customer records.",
+    "",
+    "**Result:** " + status + (reason ? " — " + reason : ""),
+    "",
+    "## Public homepage",
+    "",
+    home ? "![Public homepage](docs/testing/visuals/01-homepage.png)" : "_Homepage screenshot not captured._",
+    "",
+    "The public page describes the features that the backend actually exposes. Opening the workspace navigates into the operational dashboard.",
+    ""
+  ];
+  for (const section of sections) {
+    lines.push("## " + section[0], "");
+    for (const item of section[1]) {
+      lines.push("### " + item[1], "", "![" + item[1] + "](docs/testing/visuals/" + item[0] + ")", "", item[2], "");
+    }
+  }
+  lines.push(
+    "## Evidence and scope",
+    "",
+    "See [the integration test report](docs/testing/INTEGRATION-REPORT.md) and [captured browser API traffic](docs/testing/api-network.json) for assertions and the HTTP requests observed from the running API.",
+    "",
+    "Each balance operation is checked in the UI, on the next API read, and with a direct SQL query. Schema migration execution is tested only against this disposable database.",
+    "",
+    "A passing run proves the production-built frontend, actual FastAPI implementation, and a real PostgreSQL server worked together in this browser test. It does not establish correctness against a production database, real customer accounts, production secrets, or external service delivery.",
+    ""
+  );
+  const requestRows = apiRequests.length
+    ? apiRequests.map((item) => "| " + item.method + " | " + item.path + " | " + item.status + " |").join("\n")
+    : "| No API responses observed | — | — |";
+  const checkRows = checks.length
+    ? checks.map((item) => "| " + item.status.toUpperCase() + " | " + item.name.replace(/\|/g, "\\|") + " | " + (item.evidence || "").replace(/\|/g, "\\|").replace(/\n/g, " ") + " |").join("\n")
+    : "| UNKNOWN | No completed assertions | " + String(reason || "See workflow log.") + " |";
+  const dbRows = dbChecks.length
+    ? dbChecks.map((item) => "| " + item.status.toUpperCase() + " | " + item.check + " | " + item.expected + " | " + item.actual + " |").join("\n")
+    : "| UNKNOWN | No direct database assertions recorded | — | — |";
+  const directRows = directApiChecks.length
+    ? directApiChecks.map((item) => "| " + item.name + " | " + item.status + " | " + item.expected + " | " + item.actual + " |").join("\n")
+    : "| No direct validation calls recorded | — | — |";
+  const browserErrorLines = browserErrors.length ? browserErrors.map((item) => "- " + item).join("\n") : "- No uncaught browser errors observed.";
+  const report = [
+    "# Mintline integrated E2E verification report",
+    "",
+    "- Overall status: " + status,
+    "- Started at UTC: " + startedAt,
+    "- Frontend: production Vite build served at " + baseUrl,
+    "- Backend: FastAPI main checkout at " + apiBaseUrl,
+    "- Database: ephemeral PostgreSQL; direct verification via psql",
+    "- Data: synthetic test-only users; no production database connection",
+    "- Browser: Playwright Chromium",
+    "- API mocking: none; observed browser responses come from the live FastAPI process",
+    "",
+    "## Browser/API assertions",
+    "",
+    "| Status | Assertion | Evidence |",
+    "| --- | --- | --- |",
+    checkRows,
+    "",
+    "## Direct PostgreSQL checks",
+    "",
+    "| Status | Check | Expected | Actual |",
+    "| --- | --- | --- |",
+    dbRows,
+    "",
+    "## Direct backend validation requests",
+    "",
+    "| Check | Status | Expected | Actual |",
+    "| --- | --- | --- |",
+    directRows,
+    "",
+    "## Actual browser API traffic",
+    "",
+    "| Method | Path | HTTP status |",
+    "| --- | --- | --- |",
+    requestRows,
+    "",
+    "## Browser errors",
+    "",
+    browserErrorLines,
+    "",
+    "## Screenshots captured",
+    "",
+    ...captured.map((item) => "- [" + item[1] + "](visuals/" + item[0] + ") — " + item[2]),
+    "",
+    "## Interpretation",
+    "",
+    "Passing verifies frontend-to-backend HTTP integration, backend behavior, write persistence, and selected database constraints in an isolated real PostgreSQL server. It is not a production database verification.",
+    ""
+  ].join("\n");
+  await fs.writeFile(path.join(root, "visual.md"), lines.join("\n"), "utf8");
+  await fs.writeFile(path.join(docsDir, "INTEGRATION-REPORT.md"), report, "utf8");
+  await fs.writeFile(path.join(docsDir, "api-network.json"), JSON.stringify({
+    runStartedAt: startedAt,
+    overallStatus: status,
+    apiOrigin,
+    note: "No API routes were mocked or intercepted. API keys and request headers are deliberately excluded.",
+    browserRequests: apiRequests,
+    directBackendChecks: directApiChecks,
+    databaseChecks: dbChecks,
+    assertions: checks,
+    browserErrors,
+    screenshots: capturedScreenshots
+  }, null, 2) + "\n", "utf8");
+}
+
+async function run() {
+  assert.ok(adminKey, "ADMIN_API_KEY was not configured for this test backend.");
+  assert.ok(psqlUrl, "PSQL_URL was not configured for direct database verification.");
+  browser = await chromium.launch({ headless: true });
+  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1 });
+  const page = await context.newPage();
+  page.setDefaultTimeout(10000);
+  page.on("pageerror", (error) => browserErrors.push(String(error.message || error)));
+  page.on("response", (response) => {
+    try {
+      const parsed = new URL(response.url());
+      if (parsed.origin !== apiOrigin) return;
+      const request = response.request();
+      apiRequests.push({
+        at: new Date().toISOString(),
+        method: request.method(),
+        path: parsed.pathname,
+        status: response.status(),
+        requestBody: request.postData() || undefined
+      });
+    } catch {}
+  });
+
+  await verify("PostgreSQL contains a queryable seeded test account", async () => {
+    assert.equal(sqlValue("SELECT count(*) FROM users WHERE user_id=1 AND email='e2e-mintline@example.invalid';"), "1");
+    assert.equal(sqlValue("SELECT credits FROM credits WHERE user_id=1;"), "120");
+    return "user_id 1 starts at 120 credits in PostgreSQL";
+  });
+
+  await verify("Public homepage renders", async () => {
+    await page.goto(baseUrl, { waitUntil: "networkidle" });
+    await page.getByRole("button", { name: /Open credit dashboard/i }).waitFor({ state: "visible" });
+    await takeScreenshot(page, "01-homepage.png");
+  });
+
+  await verify("Opening the dashboard calls live health and account endpoints", async () => {
+    await page.getByRole("button", { name: /Open credit dashboard/i }).click();
+    await page.waitForURL("**/dashboard");
+    await waitForBalance(page, 120);
+    await page.getByText("API connected", { exact: true }).first().waitFor({ state: "visible" });
+    expectApi("GET", "/healthz", 200);
+    expectApi("GET", "/api/credits/1", 200);
+    await takeScreenshot(page, "02-dashboard-initial-balance.png");
+    return "GET /healthz = 200; GET /api/credits/1 = 200; UI balance = 120";
+  });
+
+  await verify("Adding 25 credits updates the UI and the actual database row", async () => {
+    await page.getByRole("button", { name: /Add credits/i }).click();
+    const dialog = page.getByRole("dialog");
+    await dialog.waitFor({ state: "visible" });
+    await takeScreenshot(page, "03-add-credit-dialog.png");
+    await page.getByLabel("Amount to add").fill("25");
+    await dialog.getByRole("button", { name: "Confirm addition" }).click();
+    await dialog.waitFor({ state: "hidden" });
+    await waitForBalance(page, 145);
+    expectApi("POST", "/api/credits/1/add", 200);
+    await assertDatabaseBalance(145, "Add operation committed to PostgreSQL");
+    await takeScreenshot(page, "04-after-add-credit.png");
+    return "POST /api/credits/1/add = 200; UI and direct SQL both report 145";
+  });
+
+  await verify("Reloading re-reads the persisted account balance", async () => {
+    await page.reload({ waitUntil: "networkidle" });
+    await waitForBalance(page, 145);
+    expectApi("GET", "/api/credits/1", 200);
+    await assertDatabaseBalance(145, "Read-after-write persistence after reload");
+    return "Browser reload reads 145 through the backend";
+  });
+
+  await verify("Deducting 40 credits updates the UI and the actual database row", async () => {
+    await page.getByRole("button", { name: /Deduct credits/i }).click();
+    const dialog = page.getByRole("dialog");
+    await dialog.waitFor({ state: "visible" });
+    await takeScreenshot(page, "05-deduct-credit-dialog.png");
+    await page.getByLabel("Amount to deduct").fill("40");
+    await dialog.getByRole("button", { name: "Confirm deduction" }).click();
+    await dialog.waitFor({ state: "hidden" });
+    await waitForBalance(page, 105);
+    expectApi("POST", "/api/credits/1/deduct", 200);
+    await assertDatabaseBalance(105, "Deduct operation committed to PostgreSQL");
+    await takeScreenshot(page, "06-after-deduct-credit.png");
+    return "POST /api/credits/1/deduct = 200; UI and direct SQL both report 105";
+  });
+
+  await verify("Resetting sends PATCH and persists zero", async () => {
+    await page.getByRole("button", { name: /Reset balance/i }).click();
+    const dialog = page.getByRole("dialog");
+    await dialog.waitFor({ state: "visible" });
+    await page.getByRole("checkbox", { name: /I understand the current balance will be cleared/i }).check();
+    await takeScreenshot(page, "07-reset-confirmation.png");
+    await dialog.getByRole("button", { name: "Reset balance" }).click();
+    await dialog.waitFor({ state: "hidden" });
+    await waitForBalance(page, 0);
+    expectApi("PATCH", "/api/credits/1/reset", 200);
+    await assertDatabaseBalance(0, "Reset operation committed to PostgreSQL");
+    await takeScreenshot(page, "08-after-reset.png");
+    return "PATCH /api/credits/1/reset = 200; UI and direct SQL both report 0";
+  });
+
+  await verify("Backend rejects a zero-amount add without changing the database", async () => {
+    const response = await fetch(apiBaseUrl + "/api/credits/1/add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ amount: 0 })
+    });
+    const body = await response.text();
+    directApiChecks.push({ name: "POST add with amount=0", status: response.status, expected: 422, actual: response.status, detail: body });
+    assert.equal(response.status, 422);
+    await assertDatabaseBalance(0, "Invalid amount did not alter balance");
+    return "POST amount=0 = 422; balance remains 0";
+  });
+
+  await verify("Backend rejects over-deduction even on direct API calls", async () => {
+    const response = await fetch(apiBaseUrl + "/api/credits/1/deduct", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ amount: 1 })
+    });
+    const body = await response.text();
+    directApiChecks.push({ name: "POST deduct above available balance", status: response.status, expected: 400, actual: response.status, detail: body });
+    assert.equal(response.status, 400);
+    assert.ok(body.includes("Insufficient credits"));
+    await assertDatabaseBalance(0, "Over-deduction did not alter balance");
+    return "POST deduct from zero = 400 Insufficient credits; balance remains 0";
+  });
+
+  await verify("Missing user shows the real backend 404 in the frontend", async () => {
+    await page.getByLabel("User ID").fill("999999");
+    await page.getByRole("button", { name: /Open account/i }).click();
+    await page.locator(".error-banner").waitFor({ state: "visible" });
+    assert.match(await page.locator(".error-banner").innerText(), /User not found/i);
+    expectApi("GET", "/api/credits/999999", 404);
+    await takeScreenshot(page, "09-user-not-found.png");
+    await page.getByLabel("User ID").fill("1");
+    await page.getByRole("button", { name: /Open account/i }).click();
+    await waitForBalance(page, 0);
+    return "GET /api/credits/999999 = 404; visible account-not-found message";
+  });
+
+  await verify("Admin screen displays the real 401 from an incorrect API key", async () => {
+    await page.getByRole("button", { name: /Admin & migrations/i }).click();
+    await page.locator("#admin-key").fill("incorrect-e2e-key");
+    await page.getByRole("button", { name: /Load migration history/i }).click();
+    await page.locator(".inline-error").filter({ hasText: "Unauthorized" }).waitFor({ state: "visible" });
+    expectApi("GET", "/api/schema/migrations", 401);
+    await takeScreenshot(page, "10-admin-unauthorized.png");
+    return "GET /api/schema/migrations with bad key = 401";
+  });
+
+  await verify("Correct admin key loads migration history from PostgreSQL", async () => {
+    await page.locator("#admin-key").fill(adminKey);
+    await page.getByRole("button", { name: /Load migration history/i }).click();
+    await page.getByRole("heading", { name: "Migration history" }).waitFor({ state: "visible" });
+    await page.getByText("No migrations recorded yet", { exact: true }).waitFor({ state: "visible" });
+    expectApi("GET", "/api/schema/migrations", 200);
+    await takeScreenshot(page, "11-admin-migration-history.png");
+    return "GET /api/schema/migrations with correct key = 200";
+  });
+
+  await verify("Browser migration submission creates an index and audit record", async () => {
+    await page.getByLabel("Migration name").fill("e2e_verified_credits_index");
+    await page.getByLabel("SQL statement").fill("CREATE INDEX IF NOT EXISTS idx_e2e_credits_last_updated ON credits(last_updated DESC);");
+    await page.getByRole("checkbox", { name: /I reviewed this SQL and understand it will execute/i }).check();
+    await page.getByRole("button", { name: /Apply migration/i }).click();
+    await page.locator(".inline-success").filter({ hasText: "was applied successfully" }).waitFor({ state: "visible" });
+    expectApi("POST", "/api/schema/apply", 200);
+    assert.equal(sqlValue("SELECT count(*) FROM schema_migrations WHERE migration_name='e2e_verified_credits_index';"), "1");
+    assert.equal(sqlValue("SELECT (to_regclass('public.idx_e2e_credits_last_updated') IS NOT NULL)::text;"), "true");
+    dbChecks.push({ check: "Migration row is recorded in PostgreSQL", status: "passed", expected: "1", actual: "1" });
+    dbChecks.push({ check: "Submitted index exists in PostgreSQL", status: "passed", expected: "true", actual: "true" });
+    await takeScreenshot(page, "12-admin-migration-applied.png");
+    return "POST /api/schema/apply = 200; SQL confirms the index and exactly one migration record";
+  });
+
+  await verify("Repeated migration name is idempotently skipped", async () => {
+    await page.getByLabel("Migration name").fill("e2e_verified_credits_index");
+    await page.getByLabel("SQL statement").fill("CREATE INDEX IF NOT EXISTS idx_e2e_credits_last_updated ON credits(last_updated DESC);");
+    await page.getByRole("checkbox", { name: /I reviewed this SQL and understand it will execute/i }).check();
+    await page.getByRole("button", { name: /Apply migration/i }).click();
+    await page.locator(".inline-success").filter({ hasText: "no SQL was applied" }).waitFor({ state: "visible" });
+    expectApi("POST", "/api/schema/apply", 200);
+    assert.equal(sqlValue("SELECT count(*) FROM schema_migrations WHERE migration_name='e2e_verified_credits_index';"), "1");
+    return "Second request was skipped; exactly one migration row remains";
+  });
+
+  await verify("Production-built dashboard and navigation work at mobile width", async () => {
+    const mobile = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await mobile.goto(baseUrl + "/dashboard", { waitUntil: "networkidle" });
+    await waitForBalance(mobile, 0);
+    await takeScreenshot(mobile, "13-mobile-dashboard.png");
+    await mobile.getByRole("button", { name: "Open navigation" }).click();
+    await mobile.getByRole("navigation", { name: "Main navigation" }).waitFor({ state: "visible" });
+    await takeScreenshot(mobile, "14-mobile-navigation.png");
+    assert.ok(apiRequests.some((item) => item.method === "GET" && item.path === "/api/credits/1" && item.status === 200));
+    await mobile.close();
+    return "390×844 viewport rendered; account was loaded through GET /api/credits/1";
+  });
+
+  await verify("Daily scheduler logic updates the isolated database", async () => {
+    sqlValue("INSERT INTO users (user_id,email,name) VALUES (2,'scheduler-e2e@example.invalid','Scheduler Test User') ON CONFLICT (user_id) DO NOTHING; SELECT setval(pg_get_serial_sequence('users','user_id'), (SELECT MAX(user_id) FROM users), true);");
+    const scheduler = spawnSync("python", ["-c", "from src.scheduler import add_daily_credits; add_daily_credits()"], {
+      cwd: backendRoot, encoding: "utf8", env: process.env
+    });
+    assert.equal(scheduler.status, 0, "Scheduler failed: " + (scheduler.stderr || scheduler.stdout));
+    const state = sqlValue("SELECT user_id || ':' || credits FROM credits ORDER BY user_id;");
+    assert.equal(state, "1:5\n2:5");
+    dbChecks.push({ check: "Scheduler increments existing and creates missing credit rows", status: "passed", expected: "1:5 and 2:5", actual: state });
+    return "Scheduler adds 5 credits to existing users and seeds a missing credits row";
+  });
+
+  await verify("No uncaught browser JavaScript errors occurred", async () => {
+    assert.deepEqual(browserErrors, []);
+    return "0 page errors";
+  });
+
+  await verify("All implemented frontend API operations were observed against the real backend", async () => {
+    const required = [
+      ["GET", "/healthz", 200],
+      ["GET", "/api/credits/1", 200],
+      ["POST", "/api/credits/1/add", 200],
+      ["POST", "/api/credits/1/deduct", 200],
+      ["PATCH", "/api/credits/1/reset", 200],
+      ["GET", "/api/credits/999999", 404],
+      ["GET", "/api/schema/migrations", 401],
+      ["GET", "/api/schema/migrations", 200],
+      ["POST", "/api/schema/apply", 200]
+    ];
+    for (const item of required) expectApi(item[0], item[1], item[2]);
+    assert.ok(apiRequests.length >= 10, "Only " + apiRequests.length + " browser API responses were observed.");
+    return apiRequests.length + " browser-observed HTTP responses; no API route mocks";
+  });
+}
+
+try {
+  await run();
+} catch (error) {
+  fatalError = error;
+  console.error(error && error.stack ? error.stack : error);
+} finally {
+  if (browser) {
+    try { await browser.close(); } catch {}
+  }
+  const status = fatalError ? "FAILED" : "PASSED";
+  try {
+    await writeReports(status, fatalError ? String(fatalError.message || fatalError) : "");
+  } catch (reportError) {
+    console.error("Unable to write report files: " + String(reportError && reportError.message ? reportError.message : reportError));
+    if (!fatalError) fatalError = reportError;
+  }
+  console.log("Captured screenshots: " + capturedScreenshots.length);
+  console.log("Browser-observed backend responses: " + apiRequests.length);
+  console.log("Completed assertions: " + checks.filter((item) => item.status === "passed").length);
+  console.log("Failed assertions: " + checks.filter((item) => item.status === "failed").length);
+}
+
+if (fatalError) process.exitCode = 1;
