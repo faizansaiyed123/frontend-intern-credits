@@ -1,99 +1,99 @@
 {
-  "runStartedAt": "2026-10-22T12:41:13.770Z",
+  "runStartedAt": "2026-10-22T12:55:05.171Z",
   "overallStatus": "PASSED",
   "apiOrigin": "http://127.0.0.1:8000",
   "note": "No API routes were mocked or intercepted. API keys and request headers are deliberately excluded.",
   "browserRequests": [
     {
-      "at": "2026-10-22T12:41:16.189Z",
+      "at": "2026-10-22T12:55:12.174Z",
       "method": "GET",
       "path": "/healthz",
       "status": 200
     },
     {
-      "at": "2026-10-22T12:41:16.189Z",
+      "at": "2026-10-22T12:55:12.175Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-22T12:41:16.844Z",
+      "at": "2026-10-22T12:55:12.879Z",
       "method": "POST",
       "path": "/api/credits/1/add",
       "status": 200,
       "requestBody": "{\"amount\":25}"
     },
     {
-      "at": "2026-10-22T12:41:17.178Z",
+      "at": "2026-10-22T12:55:13.168Z",
       "method": "GET",
       "path": "/healthz",
       "status": 200
     },
     {
-      "at": "2026-10-22T12:41:17.182Z",
+      "at": "2026-10-22T12:55:13.172Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-22T12:41:18.130Z",
+      "at": "2026-10-22T12:55:14.084Z",
       "method": "POST",
       "path": "/api/credits/1/deduct",
       "status": 200,
       "requestBody": "{\"amount\":40}"
     },
     {
-      "at": "2026-10-22T12:41:18.990Z",
+      "at": "2026-10-22T12:55:14.914Z",
       "method": "PATCH",
       "path": "/api/credits/1/reset",
       "status": 200
     },
     {
-      "at": "2026-10-22T12:41:19.443Z",
+      "at": "2026-10-22T12:55:15.329Z",
       "method": "GET",
       "path": "/api/credits/999999",
       "status": 404
     },
     {
-      "at": "2026-10-22T12:41:19.694Z",
+      "at": "2026-10-22T12:55:15.598Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-22T12:41:19.826Z",
+      "at": "2026-10-22T12:55:15.749Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 401
     },
     {
-      "at": "2026-10-22T12:41:20.041Z",
+      "at": "2026-10-22T12:55:15.964Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 200
     },
     {
-      "at": "2026-10-22T12:41:20.541Z",
+      "at": "2026-10-22T12:55:16.448Z",
       "method": "POST",
       "path": "/api/schema/apply",
       "status": 200,
       "requestBody": "{\"migration_name\":\"e2e_verified_credits_index\",\"sql\":\"CREATE INDEX IF NOT EXISTS idx_e2e_credits_last_updated ON credits(last_updated DESC);\"}"
     },
     {
-      "at": "2026-10-22T12:41:20.546Z",
+      "at": "2026-10-22T12:55:16.454Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 200
     },
     {
-      "at": "2026-10-22T12:41:20.875Z",
+      "at": "2026-10-22T12:55:16.780Z",
       "method": "POST",
       "path": "/api/schema/apply",
       "status": 200,
       "requestBody": "{\"migration_name\":\"e2e_verified_credits_index\",\"sql\":\"CREATE INDEX IF NOT EXISTS idx_e2e_credits_last_updated ON credits(last_updated DESC);\"}"
     },
     {
-      "at": "2026-10-22T12:41:20.879Z",
+      "at": "2026-10-22T12:55:16.786Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 200
