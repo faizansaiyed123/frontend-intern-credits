@@ -213,7 +213,7 @@ async function writeReports(status, reason) {
 async function run() {
   assert.ok(adminKey, "ADMIN_API_KEY was not configured for this test backend.");
   assert.ok(psqlUrl, "PSQL_URL was not configured for direct database verification.");
-  browser = await chromium.launch({ headless: true });
+  browser = await chromium.launch({ headless: true, channel: "chrome" });
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1 });
   const page = await context.newPage();
   page.setDefaultTimeout(10000);
