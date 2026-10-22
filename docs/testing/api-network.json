@@ -1,0 +1,289 @@
+{
+  "runStartedAt": "2026-10-22T12:41:13.770Z",
+  "overallStatus": "PASSED",
+  "apiOrigin": "http://127.0.0.1:8000",
+  "note": "No API routes were mocked or intercepted. API keys and request headers are deliberately excluded.",
+  "browserRequests": [
+    {
+      "at": "2026-10-22T12:41:16.189Z",
+      "method": "GET",
+      "path": "/healthz",
+      "status": 200
+    },
+    {
+      "at": "2026-10-22T12:41:16.189Z",
+      "method": "GET",
+      "path": "/api/credits/1",
+      "status": 200
+    },
+    {
+      "at": "2026-10-22T12:41:16.844Z",
+      "method": "POST",
+      "path": "/api/credits/1/add",
+      "status": 200,
+      "requestBody": "{\"amount\":25}"
+    },
+    {
+      "at": "2026-10-22T12:41:17.178Z",
+      "method": "GET",
+      "path": "/healthz",
+      "status": 200
+    },
+    {
+      "at": "2026-10-22T12:41:17.182Z",
+      "method": "GET",
+      "path": "/api/credits/1",
+      "status": 200
+    },
+    {
+      "at": "2026-10-22T12:41:18.130Z",
+      "method": "POST",
+      "path": "/api/credits/1/deduct",
+      "status": 200,
+      "requestBody": "{\"amount\":40}"
+    },
+    {
+      "at": "2026-10-22T12:41:18.990Z",
+      "method": "PATCH",
+      "path": "/api/credits/1/reset",
+      "status": 200
+    },
+    {
+      "at": "2026-10-22T12:41:19.443Z",
+      "method": "GET",
+      "path": "/api/credits/999999",
+      "status": 404
+    },
+    {
+      "at": "2026-10-22T12:41:19.694Z",
+      "method": "GET",
+      "path": "/api/credits/1",
+      "status": 200
+    },
+    {
+      "at": "2026-10-22T12:41:19.826Z",
+      "method": "GET",
+      "path": "/api/schema/migrations",
+      "status": 401
+    },
+    {
+      "at": "2026-10-22T12:41:20.041Z",
+      "method": "GET",
+      "path": "/api/schema/migrations",
+      "status": 200
+    },
+    {
+      "at": "2026-10-22T12:41:20.541Z",
+      "method": "POST",
+      "path": "/api/schema/apply",
+      "status": 200,
+      "requestBody": "{\"migration_name\":\"e2e_verified_credits_index\",\"sql\":\"CREATE INDEX IF NOT EXISTS idx_e2e_credits_last_updated ON credits(last_updated DESC);\"}"
+    },
+    {
+      "at": "2026-10-22T12:41:20.546Z",
+      "method": "GET",
+      "path": "/api/schema/migrations",
+      "status": 200
+    },
+    {
+      "at": "2026-10-22T12:41:20.875Z",
+      "method": "POST",
+      "path": "/api/schema/apply",
+      "status": 200,
+      "requestBody": "{\"migration_name\":\"e2e_verified_credits_index\",\"sql\":\"CREATE INDEX IF NOT EXISTS idx_e2e_credits_last_updated ON credits(last_updated DESC);\"}"
+    },
+    {
+      "at": "2026-10-22T12:41:20.879Z",
+      "method": "GET",
+      "path": "/api/schema/migrations",
+      "status": 200
+    }
+  ],
+  "directBackendChecks": [
+    {
+      "name": "POST add with amount=0",
+      "status": 422,
+      "expected": 422,
+      "actual": 422,
+      "detail": "{\"detail\":[{\"type\":\"greater_than\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Input should be greater than 0\",\"input\":0,\"ctx\":{\"gt\":0}}]}"
+    },
+    {
+      "name": "POST deduct above available balance",
+      "status": 400,
+      "expected": 400,
+      "actual": 400,
+      "detail": "{\"detail\":\"Insufficient credits\"}"
+    }
+  ],
+  "databaseChecks": [
+    {
+      "check": "Add operation committed to PostgreSQL",
+      "status": "passed",
+      "query": "SELECT credits FROM credits WHERE user_id = 1",
+      "expected": "145",
+      "actual": "145"
+    },
+    {
+      "check": "Read-after-write persistence after reload",
+      "status": "passed",
+      "query": "SELECT credits FROM credits WHERE user_id = 1",
+      "expected": "145",
+      "actual": "145"
+    },
+    {
+      "check": "Deduct operation committed to PostgreSQL",
+      "status": "passed",
+      "query": "SELECT credits FROM credits WHERE user_id = 1",
+      "expected": "105",
+      "actual": "105"
+    },
+    {
+      "check": "Reset operation committed to PostgreSQL",
+      "status": "passed",
+      "query": "SELECT credits FROM credits WHERE user_id = 1",
+      "expected": "0",
+      "actual": "0"
+    },
+    {
+      "check": "Invalid amount did not alter balance",
+      "status": "passed",
+      "query": "SELECT credits FROM credits WHERE user_id = 1",
+      "expected": "0",
+      "actual": "0"
+    },
+    {
+      "check": "Over-deduction did not alter balance",
+      "status": "passed",
+      "query": "SELECT credits FROM credits WHERE user_id = 1",
+      "expected": "0",
+      "actual": "0"
+    },
+    {
+      "check": "Migration row is recorded in PostgreSQL",
+      "status": "passed",
+      "expected": "1",
+      "actual": "1"
+    },
+    {
+      "check": "Submitted index exists in PostgreSQL",
+      "status": "passed",
+      "expected": "true",
+      "actual": "true"
+    },
+    {
+      "check": "Scheduler increments existing and creates missing credit rows",
+      "status": "passed",
+      "expected": "1:5 and 2:5",
+      "actual": "1:5\n2:5"
+    }
+  ],
+  "assertions": [
+    {
+      "name": "PostgreSQL contains a queryable seeded test account",
+      "status": "passed",
+      "evidence": "user_id 1 starts at 120 credits in PostgreSQL"
+    },
+    {
+      "name": "Public homepage renders",
+      "status": "passed",
+      "evidence": ""
+    },
+    {
+      "name": "Opening the dashboard calls live health and account endpoints",
+      "status": "passed",
+      "evidence": "GET /healthz = 200; GET /api/credits/1 = 200; UI balance = 120"
+    },
+    {
+      "name": "Adding 25 credits updates the UI and the actual database row",
+      "status": "passed",
+      "evidence": "POST /api/credits/1/add = 200; UI and direct SQL both report 145"
+    },
+    {
+      "name": "Reloading re-reads the persisted account balance",
+      "status": "passed",
+      "evidence": "Browser reload reads 145 through the backend"
+    },
+    {
+      "name": "Deducting 40 credits updates the UI and the actual database row",
+      "status": "passed",
+      "evidence": "POST /api/credits/1/deduct = 200; UI and direct SQL both report 105"
+    },
+    {
+      "name": "Resetting sends PATCH and persists zero",
+      "status": "passed",
+      "evidence": "PATCH /api/credits/1/reset = 200; UI and direct SQL both report 0"
+    },
+    {
+      "name": "Backend rejects a zero-amount add without changing the database",
+      "status": "passed",
+      "evidence": "POST amount=0 = 422; balance remains 0"
+    },
+    {
+      "name": "Backend rejects over-deduction even on direct API calls",
+      "status": "passed",
+      "evidence": "POST deduct from zero = 400 Insufficient credits; balance remains 0"
+    },
+    {
+      "name": "Missing user shows the real backend 404 in the frontend",
+      "status": "passed",
+      "evidence": "GET /api/credits/999999 = 404; visible account-not-found message"
+    },
+    {
+      "name": "Admin screen displays the real 401 from an incorrect API key",
+      "status": "passed",
+      "evidence": "GET /api/schema/migrations with bad key = 401"
+    },
+    {
+      "name": "Correct admin key loads migration history from PostgreSQL",
+      "status": "passed",
+      "evidence": "GET /api/schema/migrations with correct key = 200"
+    },
+    {
+      "name": "Browser migration submission creates an index and audit record",
+      "status": "passed",
+      "evidence": "POST /api/schema/apply = 200; SQL confirms the index and exactly one migration record"
+    },
+    {
+      "name": "Repeated migration name is idempotently skipped",
+      "status": "passed",
+      "evidence": "Second request was skipped; exactly one migration row remains"
+    },
+    {
+      "name": "Production-built dashboard and navigation work at mobile width",
+      "status": "passed",
+      "evidence": "390×844 viewport rendered; account was loaded through GET /api/credits/1"
+    },
+    {
+      "name": "Daily scheduler logic updates the isolated database",
+      "status": "passed",
+      "evidence": "Scheduler adds 5 credits to existing users and seeds a missing credits row"
+    },
+    {
+      "name": "No uncaught browser JavaScript errors occurred",
+      "status": "passed",
+      "evidence": "0 page errors"
+    },
+    {
+      "name": "All implemented frontend API operations were observed against the real backend",
+      "status": "passed",
+      "evidence": "15 browser-observed HTTP responses; no API route mocks"
+    }
+  ],
+  "browserErrors": [],
+  "screenshots": [
+    "01-homepage.png",
+    "02-dashboard-initial-balance.png",
+    "03-add-credit-dialog.png",
+    "04-after-add-credit.png",
+    "05-deduct-credit-dialog.png",
+    "06-after-deduct-credit.png",
+    "07-reset-confirmation.png",
+    "08-after-reset.png",
+    "09-user-not-found.png",
+    "10-admin-unauthorized.png",
+    "11-admin-migration-history.png",
+    "12-admin-migration-applied.png",
+    "13-mobile-dashboard.png",
+    "14-mobile-navigation.png"
+  ]
+}
