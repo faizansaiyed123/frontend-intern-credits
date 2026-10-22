@@ -66,7 +66,10 @@ jobs:
 
       - name: Generate a run-only admin key
         shell: bash
-        run: echo "ADMIN_API_KEY=$(python -c 'import secrets; print(secrets.token_urlsafe(32))')" >> "$GITHUB_ENV"
+        run: |
+          key="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
+          echo "::add-mask::$key"
+          echo "ADMIN_API_KEY=$key" >> "$GITHUB_ENV"
 
       - name: Install frontend packages and Playwright Chromium
         run: |
@@ -121,6 +124,14 @@ jobs:
       - name: Run browser-to-API integration and direct SQL assertions
         run: node scripts/e2e-credit-workspace.mjs
 
+      - name: Collect server logs for diagnostics
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p docs/testing/runtime-logs
+          [ ! -f /tmp/mintline-backend.log ] || cp /tmp/mintline-backend.log docs/testing/runtime-logs/backend.log
+          [ ! -f /tmp/mintline-frontend.log ] || cp /tmp/mintline-frontend.log docs/testing/runtime-logs/frontend.log
+
       - name: Upload screenshots and network evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -131,8 +142,7 @@ jobs:
             docs/testing/INTEGRATION-REPORT.md
             docs/testing/api-network.json
             docs/testing/visuals/
-            /tmp/mintline-backend.log
-            /tmp/mintline-frontend.log
+            docs/testing/runtime-logs/
           if-no-files-found: warn
           retention-days: 14
 
