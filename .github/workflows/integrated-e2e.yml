@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: mintline-integrated-e2e-${{ github.ref }}
+  group: mintline-integrated-e2e-v2-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
