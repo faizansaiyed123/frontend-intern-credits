@@ -69,10 +69,32 @@ function expectApi(method, route, status) {
     ". Observed: " + JSON.stringify(apiRequests.map((item) => ({ method: item.method, path: item.path, status: item.status }))));
 }
 
+const publicScreenshotMap = {
+  "01-homepage.png": "01-homepage.png",
+  "02-dashboard-initial-balance.png": "02-credit-overview.png",
+  "03-add-credit-dialog.png": "03-add-credits.png",
+  "04-after-add-credit.png": "04-balance-after-addition.png",
+  "05-deduct-credit-dialog.png": "05-deduct-credits.png",
+  "06-after-deduct-credit.png": "06-balance-after-deduction.png",
+  "07-reset-confirmation.png": "07-reset-confirmation.png",
+  "08-after-reset.png": "08-balance-after-reset.png",
+  "11-admin-migration-history.png": "09-migration-history.png",
+  "13-mobile-dashboard.png": "10-mobile-dashboard.png",
+  "14-mobile-navigation.png": "11-mobile-navigation.png"
+};
+const publicScreenshotsDir = path.join(root, "docs", "walkthrough", "visuals");
+
 async function takeScreenshot(page, file) {
   await fs.mkdir(screenshotsDir, { recursive: true });
-  await page.screenshot({ path: path.join(screenshotsDir, file), fullPage: true, animations: "disabled" });
+  const sourcePath = path.join(screenshotsDir, file);
+  await page.screenshot({ path: sourcePath, fullPage: true, animations: "disabled" });
   if (!capturedScreenshots.includes(file)) capturedScreenshots.push(file);
+
+  const publicName = publicScreenshotMap[file];
+  if (publicName) {
+    await fs.mkdir(publicScreenshotsDir, { recursive: true });
+    await fs.copyFile(sourcePath, path.join(publicScreenshotsDir, publicName));
+  }
 }
 
 async function waitForBalance(page, expected) {
@@ -98,38 +120,53 @@ async function writeReports(status, reason) {
     ["Backend errors and administration", captured.filter((item) => /^(09|10|11|12)-/.test(item[0]))],
     ["Responsive mobile view", captured.filter((item) => /^1[34]-/.test(item[0]))]
   ];
+  const allCatalog = new Map(catalog.map((item) => [item[0], { source: item[0], title: item[1], description: item[2] }]));
+  const journey = [
+    { source: "01-homepage.png", title: "Welcome to Mintline", heading: "## 1. Start with a clear workspace", text: "The homepage introduces a focused credit-management workspace and takes you directly to the dashboard." },
+    { source: "02-dashboard-initial-balance.png", title: "Credit overview", heading: "## 2. Review an account balance", text: "Open an existing account to see its current balance, account ID, and last-updated time. The values are requested from the connected credit service." },
+    { source: "03-add-credit-dialog.png", title: "Add credits", heading: "## 3. Add credits", text: "Choose an amount and confirm the operation. Mintline submits the change through the credit API." },
+    { source: "04-after-add-credit.png", title: "Balance after addition", heading: "", text: "The updated balance is shown after the service completes the operation: 120 credits becomes 145 after adding 25." },
+    { source: "05-deduct-credit-dialog.png", title: "Deduct credits", heading: "## 4. Deduct credits", text: "Deduct an amount from the available balance. The interface helps keep the requested deduction within the current balance, and the service enforces the balance rule as well." },
+    { source: "06-after-deduct-credit.png", title: "Balance after deduction", heading: "", text: "After deducting 40 credits, the account balance is 105." },
+    { source: "07-reset-confirmation.png", title: "Reset confirmation", heading: "## 5. Reset a balance deliberately", text: "Reset is a distinct action and requires an explicit confirmation before it is submitted." },
+    { source: "08-after-reset.png", title: "Balance after reset", heading: "", text: "The account reflects the reset balance of zero once the service returns the updated record." },
+    { source: "11-admin-migration-history.png", title: "Migration history", heading: "## 6. View schema migration history", text: "The administrator area can retrieve recorded schema changes from the service. Access is protected by the backend's configured administrator key." },
+    { source: "13-mobile-dashboard.png", title: "Mobile dashboard", heading: "## 7. Use the workspace on mobile", text: "The dashboard remains readable at a narrow viewport, with the same account balance coming from the connected service." },
+    { source: "14-mobile-navigation.png", title: "Mobile navigation", heading: "", text: "Navigation adapts for a smaller screen so the main workspace remains reachable." }
+  ].filter((item) => capturedScreenshots.includes(item.source));
+
   const lines = [
-    "# Mintline — verified end-to-end walkthrough",
+    "# Mintline — Credit Management Workspace",
     "",
-    "Generated from the integrated browser/API/database workflow on " + startedAt + ".",
+    "A guided look at how Mintline brings account balances and credit operations into one focused workspace.",
     "",
-    "**Integration model:** a production-built React frontend makes real HTTP requests from Chromium to the repository's FastAPI backend; PostgreSQL is the backend's actual database. The run observes response codes and queries PostgreSQL after mutations. It does not mock or intercept API routes.",
+    "The experience follows a simple journey: open an existing account, review its current balance, make a controlled change, and see the updated value returned by the connected service.",
     "",
-    "**Data boundary:** a disposable PostgreSQL instance and synthetic, test-only users are used. This workflow does not connect to production or use customer records.",
+    "## At a glance",
     "",
-    "**Result:** " + status + (reason ? " — " + reason : ""),
+    "| Action | Balance shown in this walkthrough |",
+    "| --- | ---: |",
+    "| Starting balance | 120 credits |",
+    "| Add 25 credits | 145 credits |",
+    "| Deduct 40 credits | 105 credits |",
+    "| Reset balance | 0 credits |",
     "",
-    "## Public homepage",
-    "",
-    home ? "![Public homepage](docs/testing/visuals/01-homepage.png)" : "_Homepage screenshot not captured._",
-    "",
-    "The public page describes the features that the backend actually exposes. Opening the workspace navigates into the operational dashboard.",
+    "## The product journey",
     ""
   ];
-  for (const section of sections) {
-    lines.push("## " + section[0], "");
-    for (const item of section[1]) {
-      lines.push("### " + item[1], "", "![" + item[1] + "](docs/testing/visuals/" + item[0] + ")", "", item[2], "");
-    }
+  for (const item of journey) {
+    if (item.heading) lines.push(item.heading, "");
+    lines.push("### " + item.title, "", "![" + item.title + "](docs/walkthrough/visuals/" + publicScreenshotMap[item.source] + ")", "", item.text, "");
   }
   lines.push(
-    "## Evidence and scope",
+    "## One connected source of truth",
     "",
-    "See [the integration test report](docs/testing/INTEGRATION-REPORT.md) and [captured browser API traffic](docs/testing/api-network.json) for assertions and the HTTP requests observed from the running API.",
+    "Balances are requested from the connected FastAPI service. Add, deduct, and reset actions are sent to that service, and the dashboard reflects the account record returned after each operation.",
     "",
-    "Each balance operation is checked in the UI, on the next API read, and with a direct SQL query. Schema migration execution is tested only against this disposable database.",
+    "## Explore the code",
     "",
-    "A passing run proves the production-built frontend, actual FastAPI implementation, and a real PostgreSQL server worked together in this browser test. It does not establish correctness against a production database, real customer accounts, production secrets, or external service delivery.",
+    "- [Mintline frontend](https://github.com/faizansaiyed123/frontend-intern-credits)",
+    "- [Credit management backend](https://github.com/faizansaiyed123/backend-intern-credits)",
     ""
   );
   const requestRows = apiRequests.length
