@@ -374,7 +374,7 @@ async function run() {
     await page.getByLabel("SQL statement").fill("CREATE INDEX IF NOT EXISTS idx_e2e_credits_last_updated ON credits(last_updated DESC);");
     await page.getByRole("checkbox", { name: /I reviewed this SQL and understand it will execute/i }).check();
     await page.getByRole("button", { name: /Apply migration/i }).click();
-    await page.locator(".inline-success").filter({ hasText: "was applied successfully" }).waitFor({ state: "visible" });
+    await page.locator(".inline-success").filter({ hasText: "was applied successfully" }).first().waitFor({ state: "visible" });
     expectApi("POST", "/api/schema/apply", 200);
     assert.equal(sqlValue("SELECT count(*) FROM schema_migrations WHERE migration_name='e2e_verified_credits_index';"), "1");
     assert.equal(sqlValue("SELECT (to_regclass('public.idx_e2e_credits_last_updated') IS NOT NULL)::text;"), "true");
@@ -389,7 +389,7 @@ async function run() {
     await page.getByLabel("SQL statement").fill("CREATE INDEX IF NOT EXISTS idx_e2e_credits_last_updated ON credits(last_updated DESC);");
     await page.getByRole("checkbox", { name: /I reviewed this SQL and understand it will execute/i }).check();
     await page.getByRole("button", { name: /Apply migration/i }).click();
-    await page.locator(".inline-success").filter({ hasText: "no SQL was applied" }).waitFor({ state: "visible" });
+    await page.locator(".inline-success").filter({ hasText: "no SQL was applied" }).first().waitFor({ state: "visible" });
     expectApi("POST", "/api/schema/apply", 200);
     assert.equal(sqlValue("SELECT count(*) FROM schema_migrations WHERE migration_name='e2e_verified_credits_index';"), "1");
     return "Second request was skipped; exactly one migration row remains";
