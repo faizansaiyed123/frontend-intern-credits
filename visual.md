@@ -95,6 +95,10 @@ The dashboard remains readable at a narrow viewport, with the same account balan
 
 Navigation adapts for a smaller screen so the main workspace remains reachable.
 
+## One connected source of truth
+
+Balances are requested from the connected FastAPI service. Add, deduct, and reset actions are sent to that service, and the dashboard reflects the account record returned after each operation.
+
 ## Explore the code
 
 - [Mintline frontend](https://github.com/faizansaiyed123/frontend-intern-credits)
