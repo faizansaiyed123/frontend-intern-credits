@@ -13,10 +13,12 @@ For the step-by-step browser/API/database results, see the [Visual Full-Stack Te
 ## Features
 
 - Live account balance and last-updated timestamp from the API.
-- Add, deduct, and reset credit operations with input validation, loading states, and visible errors.
+- Account registration/sign-in with salted password hashing, time-limited revocable sessions, and account-scoped reads.
+- Add, deduct, and reset operations protected by a runtime-only administrator key, with input validation, loading states, and visible errors.
 - API reachability indicator and manual refresh.
 - A focused landing page explaining only the current API capabilities, with direct navigation to the dashboard.
-- Admin migration history and guarded migration submission, using an API key entered at runtime and kept only in component memory.
+- Admin migration history and guarded, non-destructive schema migration submission, using an API key entered at runtime and kept only in component memory.
+- Account sign-out revokes the server-side session; the UI does not persist the bearer token beyond the browser tab.
 - Responsive dashboard layout with accessible labels, keyboard-friendly forms, and empty/error states.
 
 ## Run locally
