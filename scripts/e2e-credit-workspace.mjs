@@ -608,14 +608,17 @@ async function run() {
 
   await verify("Daily scheduler logic updates the isolated database", async () => {
     sqlValue("INSERT INTO users (user_id,email,name) VALUES (2,'scheduler-e2e@example.invalid','Scheduler Test User') ON CONFLICT (user_id) DO NOTHING; SELECT setval(pg_get_serial_sequence('users','user_id'), (SELECT MAX(user_id) FROM users), true);");
-    const scheduler = spawnSync("python", ["-c", "from src.scheduler import add_daily_credits; add_daily_credits()"], {
+    const scheduler = spawnSync("python", ["-c", "from src.scheduler import add_daily_credits; first=add_daily_credits(); second=add_daily_credits(); assert first is True and second is False"], {
       cwd: backendRoot, encoding: "utf8", env: process.env
     });
     assert.equal(scheduler.status, 0, "Scheduler failed: " + (scheduler.stderr || scheduler.stdout));
     const state = sqlValue("SELECT user_id || ':' || credits FROM credits ORDER BY user_id;");
     assert.equal(state, "1:5\n2:5");
+    const runCount = sqlValue("SELECT count(*) FROM credit_daily_runs;");
+    assert.equal(runCount, "1", "Daily scheduler should record the UTC run only once.");
     dbChecks.push({ check: "Scheduler increments existing and creates missing credit rows", status: "passed", expected: "1:5 and 2:5", actual: state });
-    return "Scheduler adds 5 credits to existing users and seeds a missing credits row";
+    dbChecks.push({ check: "Repeated scheduler invocation is idempotent", status: "passed", expected: "one run and balances 1:5, 2:5", actual: runCount + " run; " + state });
+    return "Scheduler adds 5 credits once per UTC day and skips repeated or parallel duplicate executions";
   });
 
   await verify("No uncaught browser JavaScript errors occurred", async () => {
