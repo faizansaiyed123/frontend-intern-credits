@@ -269,8 +269,7 @@ async function run() {
         at: new Date().toISOString(),
         method: request.method(),
         path: parsed.pathname,
-        status: response.status(),
-        requestBody: request.postData() || undefined
+        status: response.status()
       });
     } catch {}
   });
