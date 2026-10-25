@@ -524,10 +524,31 @@ async function run() {
       body: JSON.stringify({ migration_name: "e2e_rejected_multi", sql: "CREATE INDEX idx_e2e_multi ON credits(user_id); DROP TABLE credits;" })
     });
     assert.equal(multi.status, 400);
+    const createTableAs = await fetch(apiBaseUrl + "/api/schema/apply", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-API-Key": adminKey },
+      body: JSON.stringify({ migration_name: "e2e_rejected_copy", sql: "CREATE TABLE e2e_copy AS SELECT * FROM users;" })
+    });
+    assert.equal(createTableAs.status, 400);
+    const rename = await fetch(apiBaseUrl + "/api/schema/apply", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-API-Key": adminKey },
+      body: JSON.stringify({ migration_name: "e2e_rejected_rename", sql: "ALTER TABLE credits RENAME TO credits_backup;" })
+    });
+    assert.equal(rename.status, 400);
+    const invalidColumn = await fetch(apiBaseUrl + "/api/schema/apply", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-API-Key": adminKey },
+      body: JSON.stringify({ migration_name: "e2e_rejected_column", sql: "CREATE INDEX e2e_bad_column ON credits(password_hash);" })
+    });
+    assert.equal(invalidColumn.status, 400);
     assert.equal(sqlValue("SELECT (to_regclass('public.credits') IS NOT NULL)::text;"), "true");
     directApiChecks.push({ name: "Destructive migration SQL", status: destructive.status, expected: 400, actual: destructive.status });
     directApiChecks.push({ name: "Multi-statement migration SQL", status: multi.status, expected: 400, actual: multi.status });
-    return "DROP TABLE and multi-statement submissions are rejected; credits table remains";
+    directApiChecks.push({ name: "CREATE TABLE AS SELECT", status: createTableAs.status, expected: 400, actual: createTableAs.status });
+    directApiChecks.push({ name: "ALTER TABLE rename", status: rename.status, expected: 400, actual: rename.status });
+    directApiChecks.push({ name: "Index on non-allowlisted column", status: invalidColumn.status, expected: 400, actual: invalidColumn.status });
+    return "Destructive, multi-statement, table-copy, rename, and unapproved-column submissions are rejected";
   });
 
   await verify("Repeated migration name is idempotently skipped", async () => {
