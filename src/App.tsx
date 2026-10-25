@@ -520,7 +520,7 @@ function Dashboard({ onGoHome, onLogout, onSessionExpired }: { onGoHome: () => v
                   <button
                     type="button"
                     className="icon-button error-retry"
-                    onClick={() => void loadAccount(activeUserId)}
+                    onClick={() => void loadAccount(activeUserId, creditAdminKey.trim())}
                     aria-label="Retry account lookup"
                   >
                     <RefreshCw size={16} />
