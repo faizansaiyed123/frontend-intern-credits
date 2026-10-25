@@ -469,7 +469,7 @@ function Dashboard({ onGoHome, onLogout, onSessionExpired }: { onGoHome: () => v
                     className="button button-secondary refresh-button"
                     onClick={() => {
                       void checkApi();
-                      void loadAccount(activeUserId);
+                      void loadAccount(activeUserId, creditAdminKey.trim());
                     }}
                     disabled={accountLoading}
                   >
