@@ -65,12 +65,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
-      - name: Generate a run-only admin key
+      - name: Generate run-only operator and schema keys
         shell: bash
         run: |
-          key="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
-          echo "::add-mask::$key"
-          echo "ADMIN_API_KEY=$key" >> "$GITHUB_ENV"
+          admin_key="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
+          credit_key="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
+          echo "::add-mask::$admin_key"
+          echo "::add-mask::$credit_key"
+          echo "ADMIN_API_KEY=$admin_key" >> "$GITHUB_ENV"
+          echo "CREDIT_ADMIN_API_KEY=$credit_key" >> "$GITHUB_ENV"
 
       - name: Install frontend packages and verify hosted Chrome
         run: |
