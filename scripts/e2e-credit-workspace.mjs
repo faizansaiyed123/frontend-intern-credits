@@ -305,6 +305,7 @@ async function run() {
     sqlValue("UPDATE credits SET credits=120, last_updated=NOW() WHERE user_id=1;");
     await page.reload({ waitUntil: "networkidle" });
     await waitForBalance(page, 120);
+    await page.locator("#credit-admin-key").fill(adminKey);
     await page.getByText("API connected", { exact: true }).first().waitFor({ state: "visible" });
     expectApi("GET", "/healthz", 200);
     expectApi("POST", "/api/auth/register", 201);
@@ -370,7 +371,7 @@ async function run() {
   await verify("Backend rejects a zero-amount add without changing the database", async () => {
     const response = await fetch(apiBaseUrl + "/api/credits/1/add", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json", Authorization: "Bearer " + testToken },
+      headers: { "Content-Type": "application/json", Accept: "application/json", Authorization: "Bearer " + testToken, "X-API-Key": adminKey },
       body: JSON.stringify({ amount: 0 })
     });
     const body = await response.text();
@@ -383,7 +384,7 @@ async function run() {
   await verify("Backend rejects over-deduction even on direct API calls", async () => {
     const response = await fetch(apiBaseUrl + "/api/credits/1/deduct", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json", Authorization: "Bearer " + testToken },
+      headers: { "Content-Type": "application/json", Accept: "application/json", Authorization: "Bearer " + testToken, "X-API-Key": adminKey },
       body: JSON.stringify({ amount: 1 })
     });
     const body = await response.text();
