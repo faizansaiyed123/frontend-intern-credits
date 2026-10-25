@@ -15,6 +15,7 @@ import {
   Home,
   LayoutDashboard,
   LoaderCircle,
+  LogOut,
   LockKeyhole,
   Menu,
   Plus,
@@ -29,11 +30,14 @@ import {
 import {
   API_BASE_URL,
   ApiError,
+  clearAccessToken,
   addCredits,
   applyMigration,
   deductCredits,
   getApiHealth,
   getCredits,
+  getCurrentUser,
+  logoutAccount,
   listMigrations,
   resetCredits,
 } from "./api";
@@ -43,6 +47,7 @@ import type {
   SchemaMigration,
 } from "./types";
 import HomePage from "./HomePage";
+import AuthPage from "./AuthPage";
 
 type Page = "overview" | "admin";
 type ApiState = "checking" | "online" | "offline";
@@ -79,7 +84,7 @@ function operationTitle(operation: CreditOperation): string {
   return "Reset balance";
 }
 
-function Dashboard({ onGoHome }: { onGoHome: () => void }) {
+function Dashboard({ onGoHome, onLogout, onSessionExpired }: { onGoHome: () => void; onLogout: () => void; onSessionExpired: () => void }) {
   const [page, setPage] = useState<Page>("overview");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [draftUserId, setDraftUserId] = useState("1");
@@ -135,8 +140,18 @@ function Dashboard({ onGoHome }: { onGoHome: () => void }) {
 
   useEffect(() => {
     void checkApi();
-    void loadAccount(1);
-  }, [checkApi, loadAccount]);
+    void getCurrentUser()
+      .then((user) => loadAccount(user.user_id))
+      .catch((error: unknown) => {
+        if (error instanceof ApiError && error.status === 401) {
+          onSessionExpired();
+          return;
+        }
+        setAccountError(getErrorMessage(error));
+        setAccountLoading(false);
+        setApiState(error instanceof ApiError && error.status ? "online" : "offline");
+      });
+  }, [checkApi, loadAccount, onSessionExpired]);
 
   useEffect(() => {
     if (!mobileNavOpen) return;
@@ -419,6 +434,7 @@ function Dashboard({ onGoHome }: { onGoHome: () => void }) {
             <a className="icon-button topbar-docs" href={`${API_BASE_URL}/docs`} target="_blank" rel="noreferrer" aria-label="Open API documentation" title="API documentation">
               <ExternalLink size={17} />
             </a>
+            <button type="button" className="icon-button" onClick={onLogout} aria-label="Sign out" title="Sign out"><LogOut size={17} /></button>
             <div className="avatar topbar-avatar">ML</div>
           </div>
         </header>
@@ -852,6 +868,7 @@ function routeFromPath(): AppRoute {
 
 function App() {
   const [route, setRoute] = useState<AppRoute>(routeFromPath);
+  const [authenticated, setAuthenticated] = useState(() => Boolean(window.sessionStorage.getItem("mintline_access_token")));
 
   useEffect(() => {
     function syncRoute() {
@@ -870,8 +887,25 @@ function App() {
     window.scrollTo({ top: 0, behavior: "auto" });
   }
 
+  const handleSessionExpired = useCallback(() => {
+    clearAccessToken();
+    setAuthenticated(false);
+  }, []);
+
+  const handleLogout = useCallback(async () => {
+    try {
+      await logoutAccount();
+    } catch {
+      clearAccessToken();
+    }
+    setAuthenticated(false);
+  }, []);
+
   if (route === "home") return <HomePage onOpenDashboard={() => navigateTo("dashboard")} />;
-  return <Dashboard onGoHome={() => navigateTo("home")} />;
+  if (!authenticated) {
+    return <AuthPage onAuthenticated={() => setAuthenticated(true)} onGoHome={() => navigateTo("home")} />;
+  }
+  return <Dashboard onGoHome={() => navigateTo("home")} onLogout={() => void handleLogout()} onSessionExpired={handleSessionExpired} />;
 }
 
 export default App;
