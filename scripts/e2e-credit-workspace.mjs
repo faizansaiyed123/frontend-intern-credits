@@ -374,6 +374,24 @@ async function run() {
     return "PATCH /api/credits/1/reset = 200; UI and direct SQL both report 0";
   });
 
+  await verify("Concurrent credit additions are atomic", async () => {
+    const addOnce = () => fetch(apiBaseUrl + "/api/credits/1/add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + testToken, "X-API-Key": creditAdminKey },
+      body: JSON.stringify({ amount: 25 })
+    });
+    const responses = await Promise.all([addOnce(), addOnce()]);
+    assert.deepEqual(responses.map((response) => response.status), [200, 200]);
+    await assertDatabaseBalance(50, "Concurrent additions both commit without lost updates");
+    const reset = await fetch(apiBaseUrl + "/api/credits/1/reset", {
+      method: "PATCH",
+      headers: { Authorization: "Bearer " + testToken, "X-API-Key": creditAdminKey }
+    });
+    assert.equal(reset.status, 200);
+    await assertDatabaseBalance(0, "Concurrent-write test resets only the isolated test account");
+    directApiChecks.push({ name: "Concurrent additions", status: 200, expected: 200, actual: 200 });
+    return "Two concurrent +25 requests persist a final balance of 50; cleanup reset returns the test account to zero";
+  });
   await verify("Backend rejects a zero-amount add without changing the database", async () => {
     const response = await fetch(apiBaseUrl + "/api/credits/1/add", {
       method: "POST",
@@ -387,6 +405,36 @@ async function run() {
     return "POST amount=0 = 422; balance remains 0";
   });
 
+  await verify("Negative, fractional, and out-of-range amounts are rejected", async () => {
+    const amounts = [-1, 1.5, 2147483648];
+    for (const amount of amounts) {
+      const response = await fetch(apiBaseUrl + "/api/credits/1/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + testToken, "X-API-Key": creditAdminKey },
+        body: JSON.stringify({ amount })
+      });
+      assert.equal(response.status, 422, "Invalid amount " + String(amount) + " should be rejected");
+      directApiChecks.push({ name: "Invalid add amount " + String(amount), status: response.status, expected: 422, actual: response.status });
+    }
+    await assertDatabaseBalance(0, "Invalid amounts did not alter the balance");
+    return "Negative, fractional, and greater-than-PostgreSQL-integer amounts return 422; the stored balance remains zero";
+  });
+
+  await verify("Adding credits cannot overflow the PostgreSQL integer balance", async () => {
+    sqlValue("UPDATE credits SET credits=2147483647, last_updated=NOW() WHERE user_id=1;");
+    const response = await fetch(apiBaseUrl + "/api/credits/1/add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + testToken, "X-API-Key": creditAdminKey },
+      body: JSON.stringify({ amount: 1 })
+    });
+    assert.equal(response.status, 400);
+    assert.ok((await response.text()).includes("Credit balance limit exceeded"));
+    await assertDatabaseBalance(2147483647, "Overflow guard leaves the maximum valid balance unchanged");
+    sqlValue("UPDATE credits SET credits=0, last_updated=NOW() WHERE user_id=1;");
+    await assertDatabaseBalance(0, "Overflow test restores the isolated account to zero");
+    directApiChecks.push({ name: "Credit balance overflow", status: response.status, expected: 400, actual: response.status });
+    return "An addition at the maximum stored integer is rejected with 400 instead of overflowing PostgreSQL";
+  });
   await verify("Backend rejects over-deduction even on direct API calls", async () => {
     const response = await fetch(apiBaseUrl + "/api/credits/1/deduct", {
       method: "POST",
