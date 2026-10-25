@@ -291,8 +291,8 @@ async function run() {
     await page.getByRole("tab", { name: "Create account" }).click();
     await page.getByLabel("Full name").fill("Mintline E2E Test User");
     await page.getByLabel("Email address").fill("e2e-mintline@example.invalid");
-    await page.getByLabel("Password").fill("Mintline-Test-Password-2026!");
-    await page.getByLabel("Confirm password").fill("Mintline-Test-Password-2026!");
+    await page.locator("#auth-password").fill("Mintline-Test-Password-2026!");
+    await page.locator("#auth-confirm-password").fill("Mintline-Test-Password-2026!");
     await page.locator(".auth-form").getByRole("button", { name: /Create account/i }).click();
     await page.waitForFunction(() => {
       const balance = document.querySelector(".balance-number");
