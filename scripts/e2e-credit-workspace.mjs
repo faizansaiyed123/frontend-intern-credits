@@ -679,6 +679,18 @@ async function run() {
     return "Second request was skipped; exactly one migration row remains";
   });
 
+  await verify("Failed schema DDL rolls back its migration record", async () => {
+    const response = await fetch(apiBaseUrl + "/api/schema/apply", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-API-Key": adminKey },
+      body: JSON.stringify({ migration_name: "e2e_failed_ddl_rollback", sql: "CREATE INDEX idx_schema_migrations_applied_at ON credits(user_id);" })
+    });
+    assert.equal(response.status, 500);
+    assert.equal(sqlValue("SELECT count(*) FROM schema_migrations WHERE migration_name='e2e_failed_ddl_rollback';"), "0");
+    assert.equal(sqlValue("SELECT (to_regclass('public.idx_schema_migrations_applied_at') IS NOT NULL)::text;"), "true");
+    directApiChecks.push({ name: "Schema DDL failure", status: response.status, expected: 500, actual: response.status });
+    return "A database DDL error returns 500, rolls back the claimed migration row, and leaves the original index intact";
+  });
   await verify("Concurrent duplicate migrations produce one atomic result", async () => {
     const submit = () => fetch(apiBaseUrl + "/api/schema/apply", {
       method: "POST",
