@@ -233,7 +233,6 @@ async function writeReports(status, reason) {
     "Passing verifies frontend-to-backend HTTP integration, backend behavior, write persistence, and selected database constraints in an isolated real PostgreSQL server. It is not a production database verification.",
     ""
   ].join("\n");
-  await fs.writeFile(path.join(root, "visual.md"), lines.join("\n"), "utf8");
   await fs.writeFile(path.join(docsDir, "INTEGRATION-REPORT.md"), report, "utf8");
   await fs.writeFile(path.join(docsDir, "api-network.json"), JSON.stringify({
     runStartedAt: startedAt,
