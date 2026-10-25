@@ -84,12 +84,11 @@ jobs:
       - name: Install actual backend dependencies
         run: python -m pip install --upgrade pip && python -m pip install -r backend/backend-intern-credits/src/requirements.txt
 
-      - name: Initialize isolated PostgreSQL schema and known test records
+      - name: Initialize isolated PostgreSQL schema
         run: |
           psql "$PSQL_URL" -v ON_ERROR_STOP=1 -f backend/backend-intern-credits/schema.sql
-          psql "$PSQL_URL" -v ON_ERROR_STOP=1 -c "INSERT INTO users (user_id, email, name) VALUES (1, 'e2e-mintline@example.invalid', 'Mintline E2E Test User');"
-          psql "$PSQL_URL" -v ON_ERROR_STOP=1 -c "SELECT setval(pg_get_serial_sequence('users', 'user_id'), 1, true);"
-          psql "$PSQL_URL" -v ON_ERROR_STOP=1 -c "INSERT INTO credits (user_id, credits) VALUES (1, 120);"
+          # The browser E2E creates its own account through the real registration API.
+          # Keep the database otherwise empty so the generated user ID is deterministic.
 
       - name: Start the FastAPI backend from backend main
         shell: bash
