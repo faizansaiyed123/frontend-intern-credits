@@ -14,6 +14,8 @@ const apiBaseUrl = (process.env.VITE_API_BASE_URL || "http://127.0.0.1:8000").re
 const apiOrigin = new URL(apiBaseUrl).origin;
 const adminKey = process.env.ADMIN_API_KEY;
 const creditAdminKey = process.env.CREDIT_ADMIN_API_KEY;
+const testEmail = "e2e-mintline@example.invalid";
+const testPassword = "Mintline-Test-Password-2026!";
 const psqlUrl = process.env.PSQL_URL;
 const startedAt = new Date().toISOString();
 const checks = [];
@@ -290,9 +292,9 @@ async function run() {
     await page.waitForURL("**/dashboard");
     await page.getByRole("tab", { name: "Create account" }).click();
     await page.getByLabel("Full name").fill("Mintline E2E Test User");
-    await page.getByLabel("Email address").fill("e2e-mintline@example.invalid");
-    await page.locator("#auth-password").fill("Mintline-Test-Password-2026!");
-    await page.locator("#auth-confirm-password").fill("Mintline-Test-Password-2026!");
+    await page.getByLabel("Email address").fill(testEmail);
+    await page.locator("#auth-password").fill(testPassword);
+    await page.locator("#auth-confirm-password").fill(testPassword);
     await page.locator(".auth-form").getByRole("button", { name: /Create account/i }).click();
     await page.waitForFunction(() => {
       const balance = document.querySelector(".balance-number");
@@ -541,7 +543,11 @@ async function run() {
   await verify("Production-built dashboard and navigation work at mobile width", async () => {
     const mobile = await browser.newPage({ viewport: { width: 390, height: 844 } });
     await mobile.goto(baseUrl + "/dashboard", { waitUntil: "networkidle" });
+    await mobile.getByLabel("Email address").fill(testEmail);
+    await mobile.locator("#auth-password").fill(testPassword);
+    await mobile.locator(".auth-form").getByRole("button", { name: /Sign in to workspace/i }).click();
     await waitForBalance(mobile, 0);
+    await mobile.locator("#credit-admin-key").fill(creditAdminKey);
     await takeScreenshot(mobile, "13-mobile-dashboard.png");
     await mobile.getByRole("button", { name: "Open navigation" }).click();
     await mobile.getByRole("navigation", { name: "Main navigation" }).waitFor({ state: "visible" });
