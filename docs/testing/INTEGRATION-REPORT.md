@@ -1,7 +1,7 @@
 # Mintline integrated E2E verification report
 
 - Overall status: PASSED
-- Started at UTC: 2026-10-25T17:19:14.430Z
+- Started at UTC: 2026-10-25T17:20:44.552Z
 - Frontend: production Vite build served at http://127.0.0.1:4173
 - Backend: FastAPI main checkout at http://127.0.0.1:8000
 - Database: ephemeral PostgreSQL; direct verification via psql
@@ -34,7 +34,7 @@
 | PASSED | Repeated migration name is idempotently skipped | Second request was skipped; exactly one migration row remains |
 | PASSED | Production-built dashboard and navigation work at mobile width | 390×844 viewport rendered; account was loaded through GET /api/credits/1 |
 | PASSED | Logout revokes the active database session | Logout revokes the server-side session; reuse of the old token returns 401 |
-| PASSED | Daily scheduler logic updates the isolated database | Scheduler adds 5 credits to existing users and seeds a missing credits row |
+| PASSED | Daily scheduler logic updates the isolated database | Scheduler adds 5 credits once per UTC day and skips repeated or parallel duplicate executions |
 | PASSED | No uncaught browser JavaScript errors occurred | 0 page errors |
 | PASSED | All implemented frontend API operations were observed against the real backend | 21 browser-observed HTTP responses; no API route mocks |
 
@@ -53,6 +53,8 @@
 | PASSED | Migration row is recorded in PostgreSQL | 1 | 1 |
 | PASSED | Submitted index exists in PostgreSQL | true | true |
 | PASSED | Scheduler increments existing and creates missing credit rows | 1:5 and 2:5 | 1:5
+2:5 |
+| PASSED | Repeated scheduler invocation is idempotent | one run and balances 1:5, 2:5 | 1 run; 1:5
 2:5 |
 
 ## Direct backend validation requests

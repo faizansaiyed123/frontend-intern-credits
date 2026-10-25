@@ -1,131 +1,131 @@
 {
-  "runStartedAt": "2026-10-25T17:19:14.430Z",
+  "runStartedAt": "2026-10-25T17:20:44.552Z",
   "overallStatus": "PASSED",
   "apiOrigin": "http://127.0.0.1:8000",
   "note": "No API routes were mocked or intercepted. API keys and request headers are deliberately excluded.",
   "browserRequests": [
     {
-      "at": "2026-10-25T17:19:29.746Z",
+      "at": "2026-10-25T17:20:46.800Z",
       "method": "POST",
       "path": "/api/auth/register",
       "status": 201
     },
     {
-      "at": "2026-10-25T17:19:29.835Z",
+      "at": "2026-10-25T17:20:46.831Z",
       "method": "GET",
       "path": "/healthz",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:19:29.837Z",
+      "at": "2026-10-25T17:20:46.835Z",
       "method": "GET",
       "path": "/api/auth/me",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:19:29.850Z",
+      "at": "2026-10-25T17:20:46.848Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:19:30.101Z",
+      "at": "2026-10-25T17:20:47.099Z",
       "method": "GET",
       "path": "/healthz",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:19:30.103Z",
+      "at": "2026-10-25T17:20:47.099Z",
       "method": "GET",
       "path": "/api/auth/me",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:19:30.128Z",
+      "at": "2026-10-25T17:20:47.121Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:19:31.363Z",
+      "at": "2026-10-25T17:20:48.212Z",
       "method": "POST",
       "path": "/api/credits/1/add",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:19:31.768Z",
+      "at": "2026-10-25T17:20:48.596Z",
       "method": "GET",
       "path": "/healthz",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:19:31.791Z",
+      "at": "2026-10-25T17:20:48.596Z",
       "method": "GET",
       "path": "/api/auth/me",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:19:31.797Z",
+      "at": "2026-10-25T17:20:48.622Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:19:32.787Z",
+      "at": "2026-10-25T17:20:49.579Z",
       "method": "POST",
       "path": "/api/credits/1/deduct",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:19:33.872Z",
+      "at": "2026-10-25T17:20:50.629Z",
       "method": "PATCH",
       "path": "/api/credits/1/reset",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:19:34.707Z",
+      "at": "2026-10-25T17:20:51.401Z",
       "method": "GET",
       "path": "/api/credits/999999",
       "status": 404
     },
     {
-      "at": "2026-10-25T17:19:35.022Z",
+      "at": "2026-10-25T17:20:51.701Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:19:35.138Z",
+      "at": "2026-10-25T17:20:51.816Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 401
     },
     {
-      "at": "2026-10-25T17:19:35.372Z",
+      "at": "2026-10-25T17:20:52.033Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:19:35.838Z",
+      "at": "2026-10-25T17:20:52.518Z",
       "method": "POST",
       "path": "/api/schema/apply",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:19:35.843Z",
+      "at": "2026-10-25T17:20:52.523Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:19:36.210Z",
+      "at": "2026-10-25T17:20:52.902Z",
       "method": "POST",
       "path": "/api/schema/apply",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:19:36.215Z",
+      "at": "2026-10-25T17:20:52.907Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 200
@@ -317,6 +317,12 @@
       "status": "passed",
       "expected": "1:5 and 2:5",
       "actual": "1:5\n2:5"
+    },
+    {
+      "check": "Repeated scheduler invocation is idempotent",
+      "status": "passed",
+      "expected": "one run and balances 1:5, 2:5",
+      "actual": "1 run; 1:5\n2:5"
     }
   ],
   "assertions": [
@@ -428,7 +434,7 @@
     {
       "name": "Daily scheduler logic updates the isolated database",
       "status": "passed",
-      "evidence": "Scheduler adds 5 credits to existing users and seeds a missing credits row"
+      "evidence": "Scheduler adds 5 credits once per UTC day and skips repeated or parallel duplicate executions"
     },
     {
       "name": "No uncaught browser JavaScript errors occurred",
