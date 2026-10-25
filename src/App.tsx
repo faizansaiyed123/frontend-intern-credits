@@ -484,7 +484,7 @@ function Dashboard({ onGoHome, onLogout, onSessionExpired }: { onGoHome: () => v
                   <div className="toolbar-icon"><Gauge size={18} /></div>
                   <div>
                     <strong>Account lookup</strong>
-                    <span>Open an existing user by ID</span>
+                    <span>Your account, or another account with operator access</span>
                   </div>
                 </div>
                 <form className="user-search-form" onSubmit={handleUserSearch}>
