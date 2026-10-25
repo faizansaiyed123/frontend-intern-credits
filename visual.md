@@ -1,103 +1,72 @@
 # Mintline — Credit Management Workspace
 
-A guided look at how Mintline brings account balances and credit operations into one focused workspace.
+Mintline brings account balances and credit operations into a clear, focused workspace. This visual guide introduces the experience from the welcome page through account management, administrative tools, and the mobile layout.
 
-The experience follows a simple journey: open an existing account, review its current balance, make a controlled change, and see the updated value returned by the connected service.
-
-## At a glance
-
-| Action | Balance shown in this walkthrough |
-| --- | ---: |
-| Starting balance | 120 credits |
-| Add 25 credits | 145 credits |
-| Deduct 40 credits | 105 credits |
-| Reset balance | 0 credits |
-
-## The product journey
-
-## 1. Start with a clear workspace
-
-### Welcome to Mintline
+## Welcome to Mintline
 
 ![Welcome to Mintline](docs/walkthrough/visuals/01-homepage.png)
 
-The homepage introduces a focused credit-management workspace and takes you directly to the dashboard.
+The homepage introduces Mintline's purpose and gives visitors a direct route into the workspace.
 
-## 2. Review an account balance
+## Open your workspace
 
-### Credit overview
+Choose **Open credit dashboard** to continue. Sign in to an existing account or create an account to get started. New accounts begin with a zero-credit balance, and each account is restricted to its own information and credit operations.
+
+## Review your balance
 
 ![Credit overview](docs/walkthrough/visuals/02-credit-overview.png)
 
-Open an existing account to see its current balance, account ID, and last-updated time. The values are requested from the connected credit service.
+The overview brings your current balance, account ID, and last-updated time together in one place. Refresh the view to retrieve the latest account information from the connected service.
 
-## 3. Add credits
-
-### Add credits
+## Add credits
 
 ![Add credits](docs/walkthrough/visuals/03-add-credits.png)
 
-Choose an amount and confirm the operation. Mintline submits the change through the credit API.
-
-### Balance after addition
+Choose an amount and confirm the addition. Mintline sends the request to the credit service and displays the balance returned by the API.
 
 ![Balance after addition](docs/walkthrough/visuals/04-balance-after-addition.png)
 
-The updated balance is shown after the service completes the operation: 120 credits becomes 145 after adding 25.
+The balance shown here moves from 120 to 145 credits after adding 25 credits.
 
-## 4. Deduct credits
-
-### Deduct credits
+## Deduct credits
 
 ![Deduct credits](docs/walkthrough/visuals/05-deduct-credits.png)
 
-Deduct an amount from the available balance. The interface helps keep the requested deduction within the current balance, and the service enforces the balance rule as well.
-
-### Balance after deduction
+Choose how many credits to deduct. The available balance is shown before you confirm, and deductions cannot reduce the stored balance below zero.
 
 ![Balance after deduction](docs/walkthrough/visuals/06-balance-after-deduction.png)
 
-After deducting 40 credits, the account balance is 105.
+After deducting 40 credits from 145, the displayed balance becomes 105.
 
-## 5. Reset a balance deliberately
-
-### Reset confirmation
+## Reset a balance
 
 ![Reset confirmation](docs/walkthrough/visuals/07-reset-confirmation.png)
 
-Reset is a distinct action and requires an explicit confirmation before it is submitted.
-
-### Balance after reset
+Reset is a separate action because it clears the current balance. Review the confirmation before proceeding.
 
 ![Balance after reset](docs/walkthrough/visuals/08-balance-after-reset.png)
 
-The account reflects the reset balance of zero once the service returns the updated record.
+Once the reset completes, the account's balance is zero.
 
-## 6. View schema migration history
-
-### Migration history
+## Schema administration
 
 ![Migration history](docs/walkthrough/visuals/09-migration-history.png)
 
-The administrator area can retrieve recorded schema changes from the service. Access is protected by the backend's configured administrator key.
+The administrator area displays recorded schema changes and provides controls for applying supported schema updates. Access requires the backend's administrator key. Migration controls are intended for trusted administrators; the backend restricts the SQL forms accepted by this screen.
 
-## 7. Use the workspace on mobile
-
-### Mobile dashboard
+## Use Mintline on mobile
 
 ![Mobile dashboard](docs/walkthrough/visuals/10-mobile-dashboard.png)
 
-The dashboard remains readable at a narrow viewport, with the same account balance coming from the connected service.
-
-### Mobile navigation
+The workspace adapts to a narrow screen while keeping the account balance and primary operations available.
 
 ![Mobile navigation](docs/walkthrough/visuals/11-mobile-navigation.png)
 
-Navigation adapts for a smaller screen so the main workspace remains reachable.
+The navigation opens as a compact menu on mobile so you can reach the workspace sections on smaller devices.
 
-## One connected source of truth
+## Connected to the credit service
 
-Balances are requested from the connected FastAPI service. Add, deduct, and reset actions are sent to that service, and the dashboard reflects the account record returned after each operation.
+Mintline uses the connected FastAPI service for account reads and credit changes. PostgreSQL stores account information and current balances, while the interface displays the response returned by the service. Sign-in sessions are time-limited and can be revoked when you sign out.
 
 ## Explore the code
 
