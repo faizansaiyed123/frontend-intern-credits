@@ -1,7 +1,7 @@
 # Mintline integrated E2E verification report
 
 - Overall status: PASSED
-- Started at UTC: 2026-10-25T17:12:20.010Z
+- Started at UTC: 2026-10-25T17:17:36.972Z
 - Frontend: production Vite build served at http://127.0.0.1:4173
 - Backend: FastAPI main checkout at http://127.0.0.1:8000
 - Database: ephemeral PostgreSQL; direct verification via psql
@@ -30,7 +30,7 @@
 | PASSED | Admin screen displays the real 401 from an incorrect API key | GET /api/schema/migrations with bad key = 401 |
 | PASSED | Correct admin key loads migration history from PostgreSQL | GET /api/schema/migrations with correct key = 200 |
 | PASSED | Browser migration submission creates an index and audit record | POST /api/schema/apply = 200; SQL confirms the index and exactly one migration record |
-| PASSED | Migration API rejects destructive and multi-statement SQL | DROP TABLE and multi-statement submissions are rejected; credits table remains |
+| PASSED | Migration API rejects destructive and multi-statement SQL | Destructive, multi-statement, table-copy, rename, and unapproved-column submissions are rejected |
 | PASSED | Repeated migration name is idempotently skipped | Second request was skipped; exactly one migration row remains |
 | PASSED | Production-built dashboard and navigation work at mobile width | 390×844 viewport rendered; account was loaded through GET /api/credits/1 |
 | PASSED | Logout revokes the active database session | Logout revokes the server-side session; reuse of the old token returns 401 |
@@ -70,6 +70,9 @@
 | Duplicate account registration | 409 | 409 | 409 |
 | Destructive migration SQL | 400 | 400 | 400 |
 | Multi-statement migration SQL | 400 | 400 | 400 |
+| CREATE TABLE AS SELECT | 400 | 400 | 400 |
+| ALTER TABLE rename | 400 | 400 | 400 |
+| Index on non-allowlisted column | 400 | 400 | 400 |
 | Session logout | 200 | 200 | 200 |
 | Revoked session reuse | 401 | 401 | 401 |
 

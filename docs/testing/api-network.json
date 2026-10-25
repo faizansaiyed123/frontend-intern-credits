@@ -1,131 +1,131 @@
 {
-  "runStartedAt": "2026-10-25T17:12:20.010Z",
+  "runStartedAt": "2026-10-25T17:17:36.972Z",
   "overallStatus": "PASSED",
   "apiOrigin": "http://127.0.0.1:8000",
   "note": "No API routes were mocked or intercepted. API keys and request headers are deliberately excluded.",
   "browserRequests": [
     {
-      "at": "2026-10-25T17:12:21.967Z",
+      "at": "2026-10-25T17:17:39.049Z",
       "method": "POST",
       "path": "/api/auth/register",
       "status": 201
     },
     {
-      "at": "2026-10-25T17:12:21.989Z",
+      "at": "2026-10-25T17:17:39.077Z",
       "method": "GET",
       "path": "/healthz",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:12:21.994Z",
+      "at": "2026-10-25T17:17:39.083Z",
       "method": "GET",
       "path": "/api/auth/me",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:12:22.002Z",
+      "at": "2026-10-25T17:17:39.092Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:12:22.198Z",
+      "at": "2026-10-25T17:17:39.266Z",
       "method": "GET",
       "path": "/healthz",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:12:22.198Z",
+      "at": "2026-10-25T17:17:39.267Z",
       "method": "GET",
       "path": "/api/auth/me",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:12:22.212Z",
+      "at": "2026-10-25T17:17:39.275Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:12:23.245Z",
+      "at": "2026-10-25T17:17:40.203Z",
       "method": "POST",
       "path": "/api/credits/1/add",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:12:23.542Z",
+      "at": "2026-10-25T17:17:40.482Z",
       "method": "GET",
       "path": "/healthz",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:12:23.543Z",
+      "at": "2026-10-25T17:17:40.482Z",
       "method": "GET",
       "path": "/api/auth/me",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:12:23.547Z",
+      "at": "2026-10-25T17:17:40.486Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:12:24.360Z",
+      "at": "2026-10-25T17:17:41.278Z",
       "method": "POST",
       "path": "/api/credits/1/deduct",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:12:25.219Z",
+      "at": "2026-10-25T17:17:42.154Z",
       "method": "PATCH",
       "path": "/api/credits/1/reset",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:12:25.850Z",
+      "at": "2026-10-25T17:17:42.719Z",
       "method": "GET",
       "path": "/api/credits/999999",
       "status": 404
     },
     {
-      "at": "2026-10-25T17:12:26.100Z",
+      "at": "2026-10-25T17:17:42.938Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:12:26.218Z",
+      "at": "2026-10-25T17:17:43.055Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 401
     },
     {
-      "at": "2026-10-25T17:12:26.401Z",
+      "at": "2026-10-25T17:17:43.221Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:12:26.834Z",
+      "at": "2026-10-25T17:17:43.637Z",
       "method": "POST",
       "path": "/api/schema/apply",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:12:26.837Z",
+      "at": "2026-10-25T17:17:43.641Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:12:27.150Z",
+      "at": "2026-10-25T17:17:43.987Z",
       "method": "POST",
       "path": "/api/schema/apply",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:12:27.155Z",
+      "at": "2026-10-25T17:17:43.993Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 200
@@ -196,6 +196,24 @@
     },
     {
       "name": "Multi-statement migration SQL",
+      "status": 400,
+      "expected": 400,
+      "actual": 400
+    },
+    {
+      "name": "CREATE TABLE AS SELECT",
+      "status": 400,
+      "expected": 400,
+      "actual": 400
+    },
+    {
+      "name": "ALTER TABLE rename",
+      "status": 400,
+      "expected": 400,
+      "actual": 400
+    },
+    {
+      "name": "Index on non-allowlisted column",
       "status": 400,
       "expected": 400,
       "actual": 400
@@ -378,7 +396,7 @@
     {
       "name": "Migration API rejects destructive and multi-statement SQL",
       "status": "passed",
-      "evidence": "DROP TABLE and multi-statement submissions are rejected; credits table remains"
+      "evidence": "Destructive, multi-statement, table-copy, rename, and unapproved-column submissions are rejected"
     },
     {
       "name": "Repeated migration name is idempotently skipped",
