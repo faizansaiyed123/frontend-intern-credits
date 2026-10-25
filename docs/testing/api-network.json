@@ -1,131 +1,131 @@
 {
-  "runStartedAt": "2026-10-25T17:20:44.552Z",
+  "runStartedAt": "2026-10-25T17:22:10.364Z",
   "overallStatus": "PASSED",
   "apiOrigin": "http://127.0.0.1:8000",
   "note": "No API routes were mocked or intercepted. API keys and request headers are deliberately excluded.",
   "browserRequests": [
     {
-      "at": "2026-10-25T17:20:46.800Z",
+      "at": "2026-10-25T17:22:23.421Z",
       "method": "POST",
       "path": "/api/auth/register",
       "status": 201
     },
     {
-      "at": "2026-10-25T17:20:46.831Z",
+      "at": "2026-10-25T17:22:23.479Z",
       "method": "GET",
       "path": "/healthz",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:20:46.835Z",
+      "at": "2026-10-25T17:22:23.481Z",
       "method": "GET",
       "path": "/api/auth/me",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:20:46.848Z",
+      "at": "2026-10-25T17:22:23.489Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:20:47.099Z",
+      "at": "2026-10-25T17:22:23.750Z",
       "method": "GET",
       "path": "/healthz",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:20:47.099Z",
+      "at": "2026-10-25T17:22:23.755Z",
       "method": "GET",
       "path": "/api/auth/me",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:20:47.121Z",
+      "at": "2026-10-25T17:22:23.779Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:20:48.212Z",
+      "at": "2026-10-25T17:22:25.011Z",
       "method": "POST",
       "path": "/api/credits/1/add",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:20:48.596Z",
+      "at": "2026-10-25T17:22:25.385Z",
       "method": "GET",
       "path": "/healthz",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:20:48.596Z",
+      "at": "2026-10-25T17:22:25.391Z",
       "method": "GET",
       "path": "/api/auth/me",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:20:48.622Z",
+      "at": "2026-10-25T17:22:25.398Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:20:49.579Z",
+      "at": "2026-10-25T17:22:26.430Z",
       "method": "POST",
       "path": "/api/credits/1/deduct",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:20:50.629Z",
+      "at": "2026-10-25T17:22:27.411Z",
       "method": "PATCH",
       "path": "/api/credits/1/reset",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:20:51.401Z",
+      "at": "2026-10-25T17:22:28.777Z",
       "method": "GET",
       "path": "/api/credits/999999",
       "status": 404
     },
     {
-      "at": "2026-10-25T17:20:51.701Z",
+      "at": "2026-10-25T17:22:29.075Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:20:51.816Z",
+      "at": "2026-10-25T17:22:29.194Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 401
     },
     {
-      "at": "2026-10-25T17:20:52.033Z",
+      "at": "2026-10-25T17:22:29.410Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:20:52.518Z",
+      "at": "2026-10-25T17:22:29.893Z",
       "method": "POST",
       "path": "/api/schema/apply",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:20:52.523Z",
+      "at": "2026-10-25T17:22:29.897Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:20:52.902Z",
+      "at": "2026-10-25T17:22:30.277Z",
       "method": "POST",
       "path": "/api/schema/apply",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:20:52.907Z",
+      "at": "2026-10-25T17:22:30.281Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 200
@@ -183,6 +183,12 @@
       "actual": 404
     },
     {
+      "name": "Cross-account credit read with operator key",
+      "status": 200,
+      "expected": 200,
+      "actual": 200
+    },
+    {
       "name": "Incorrect password",
       "status": 401,
       "expected": 401,
@@ -193,6 +199,12 @@
       "status": 409,
       "expected": 409,
       "actual": 409
+    },
+    {
+      "name": "Sign-in rate limit",
+      "status": 429,
+      "expected": 429,
+      "actual": 429
     },
     {
       "name": "Schema migration list with credit-only key",
@@ -329,7 +341,7 @@
     {
       "name": "PostgreSQL schema contains authentication fields and revocable sessions",
       "status": "passed",
-      "evidence": "password hash column and auth_sessions table exist"
+      "evidence": "password hash, revocable sessions, and sign-in throttling tables exist"
     },
     {
       "name": "Public homepage renders",
@@ -387,9 +399,19 @@
       "evidence": "A different existing user's account is concealed with HTTP 404"
     },
     {
+      "name": "The credit-operator key grants explicit cross-account operator access",
+      "status": "passed",
+      "evidence": "The separate credit-operator key permits an explicit cross-account read"
+    },
+    {
       "name": "Invalid passwords and duplicate registrations are rejected",
       "status": "passed",
       "evidence": "Incorrect credentials return 401; duplicate email cannot create a second account"
+    },
+    {
+      "name": "Repeated failed sign-ins trigger a database-backed cooldown",
+      "status": "passed",
+      "evidence": "Ten invalid attempts trigger a 15-minute cooldown persisted in PostgreSQL"
     },
     {
       "name": "Missing user shows the real backend 404 in the frontend",

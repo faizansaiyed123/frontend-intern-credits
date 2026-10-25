@@ -1,7 +1,7 @@
 # Mintline integrated E2E verification report
 
 - Overall status: PASSED
-- Started at UTC: 2026-10-25T17:20:44.552Z
+- Started at UTC: 2026-10-25T17:22:10.364Z
 - Frontend: production Vite build served at http://127.0.0.1:4173
 - Backend: FastAPI main checkout at http://127.0.0.1:8000
 - Database: ephemeral PostgreSQL; direct verification via psql
@@ -13,7 +13,7 @@
 
 | Status | Assertion | Evidence |
 | --- | --- | --- |
-| PASSED | PostgreSQL schema contains authentication fields and revocable sessions | password hash column and auth_sessions table exist |
+| PASSED | PostgreSQL schema contains authentication fields and revocable sessions | password hash, revocable sessions, and sign-in throttling tables exist |
 | PASSED | Public homepage renders |  |
 | PASSED | Opening the dashboard calls live health and account endpoints | Account registered; hashed session persisted; authenticated balance read = 120 |
 | PASSED | Adding 25 credits updates the UI and the actual database row | POST /api/credits/1/add = 200; UI and direct SQL both report 145 |
@@ -25,7 +25,9 @@
 | PASSED | Credit endpoints reject unauthenticated reads and writes | Read and write attempts without a bearer session return 401; balance is unchanged |
 | PASSED | A signed-in user still needs the administrator key to mutate credits | A valid session alone, incorrect key, and schema-only key cannot modify credit balances |
 | PASSED | An authenticated account cannot access another user's balance | A different existing user's account is concealed with HTTP 404 |
+| PASSED | The credit-operator key grants explicit cross-account operator access | The separate credit-operator key permits an explicit cross-account read |
 | PASSED | Invalid passwords and duplicate registrations are rejected | Incorrect credentials return 401; duplicate email cannot create a second account |
+| PASSED | Repeated failed sign-ins trigger a database-backed cooldown | Ten invalid attempts trigger a 15-minute cooldown persisted in PostgreSQL |
 | PASSED | Missing user shows the real backend 404 in the frontend | GET /api/credits/999999 = 404; visible account-not-found message |
 | PASSED | Admin screen displays the real 401 from an incorrect API key | GET /api/schema/migrations with bad key = 401 |
 | PASSED | Correct admin key loads migration history from PostgreSQL | GET /api/schema/migrations with correct key = 200 |
@@ -69,8 +71,10 @@
 | Credit mutation with incorrect key | 401 | 401 | 401 |
 | Credit mutation with schema-only key | 401 | 401 | 401 |
 | Cross-account credit read | 404 | 404 | 404 |
+| Cross-account credit read with operator key | 200 | 200 | 200 |
 | Incorrect password | 401 | 401 | 401 |
 | Duplicate account registration | 409 | 409 | 409 |
+| Sign-in rate limit | 429 | 429 | 429 |
 | Schema migration list with credit-only key | 401 | 401 | 401 |
 | Destructive migration SQL | 400 | 400 | 400 |
 | Multi-statement migration SQL | 400 | 400 | 400 |
