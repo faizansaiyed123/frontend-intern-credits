@@ -146,35 +146,28 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-      - name: Publish passing screenshots and walkthrough to main
+      - name: Publish integrated test evidence without changing product screenshots
         if: success()
         shell: bash
         run: |
           set -euo pipefail
           evidence="$(mktemp -d)"
-          mkdir -p "$evidence/docs/testing" "$evidence/docs/walkthrough"
-          cp visual.md "$evidence/visual.md"
+          mkdir -p "$evidence/docs/testing"
           cp docs/testing/INTEGRATION-REPORT.md "$evidence/docs/testing/"
           cp docs/testing/api-network.json "$evidence/docs/testing/"
-          cp -R docs/testing/visuals "$evidence/docs/testing/"
-          cp -R docs/walkthrough/visuals "$evidence/docs/walkthrough/"
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin main
           git reset --hard origin/main
 
-          cp "$evidence/visual.md" visual.md
           cp "$evidence/docs/testing/INTEGRATION-REPORT.md" docs/testing/
           cp "$evidence/docs/testing/api-network.json" docs/testing/
-          rm -rf docs/testing/visuals docs/walkthrough/visuals
-          cp -R "$evidence/docs/testing/visuals" docs/testing/
-          cp -R "$evidence/docs/walkthrough/visuals" docs/walkthrough/
 
-          git add visual.md docs/testing/INTEGRATION-REPORT.md docs/testing/api-network.json docs/testing/visuals/ docs/walkthrough/visuals/
+          git add docs/testing/INTEGRATION-REPORT.md docs/testing/api-network.json
           if git diff --cached --quiet; then
-            echo "Published evidence already matches main; nothing to commit."
+            echo "Published integration evidence already matches main; nothing to commit."
             exit 0
           fi
-          git commit -m "Publish Mintline walkthrough and integration evidence"
+          git commit -m "Publish Mintline integration evidence"
           git push origin HEAD:main
