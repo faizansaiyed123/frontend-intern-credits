@@ -481,6 +481,28 @@ async function run() {
     return "Incorrect credentials return 401; duplicate email cannot create a second account";
   });
 
+  await verify("Repeated failed sign-ins trigger a database-backed cooldown", async () => {
+    const throttleEmail = "throttle-e2e@example.invalid";
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      const response = await fetch(apiBaseUrl + "/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: throttleEmail, password: "invalid-e2e-credential" })
+      });
+      assert.equal(response.status, 401);
+    }
+    const limited = await fetch(apiBaseUrl + "/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: throttleEmail, password: "invalid-e2e-credential" })
+    });
+    assert.equal(limited.status, 429);
+    assert.equal(limited.headers.get("retry-after"), "900");
+    const hash = createHash("sha256").update(throttleEmail).digest("hex");
+    assert.equal(sqlValue("SELECT (attempts >= 10 AND blocked_until > NOW())::text FROM auth_login_attempts WHERE email_hash='" + hash + "';"), "true");
+    directApiChecks.push({ name: "Sign-in rate limit", status: limited.status, expected: 429, actual: limited.status });
+    return "Ten invalid attempts trigger a 15-minute cooldown persisted in PostgreSQL";
+  });
   await verify("Missing user shows the real backend 404 in the frontend", async () => {
     await page.getByLabel("User ID").fill("999999");
     await page.getByRole("button", { name: /Open account/i }).click();
