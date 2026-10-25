@@ -23,7 +23,7 @@ The main data tables are `users` (existing accounts), `credits` (the current bal
 
 ## What was actually verified
 
-The latest security-hardening run was [GitHub Actions run 40217571361](https://github.com/faizansaiyed123/frontend-intern-credits/actions/runs/40217571361), completed on 25 October 2026. It built the production frontend, started the actual FastAPI backend source, created a disposable PostgreSQL database, exercised the UI in Playwright Chromium without API mocks, and checked stored rows directly with SQL. The run completed **32 assertions with zero failures**, observed **21 browser API responses**, captured **14 screenshots**, and reported **zero uncaught browser JavaScript errors**. The screenshot and network evidence is also available in the [run's artifact](https://api.github.com/repos/faizansaiyed123/frontend-intern-credits/actions/artifacts/12607993501). The database and test identities were isolated from production.
+The latest security-hardening run was [GitHub Actions run 40217791946](https://github.com/faizansaiyed123/frontend-intern-credits/actions/runs/40217791946), completed on 25 October 2026. It built the production frontend, started the actual FastAPI backend source, created a disposable PostgreSQL database, exercised the UI in Playwright Chromium without API mocks, and checked stored rows directly with SQL. The run completed **32 assertions with zero failures**, observed **21 browser API responses**, captured **14 screenshots**, and reported **zero uncaught browser JavaScript errors**. The screenshot and network evidence is also available in the [run's artifact](https://api.github.com/repos/faizansaiyed123/frontend-intern-credits/actions/artifacts/12607754388). The database and test identities were isolated from production.
 
 The test account was synthetic: `user_id = 1`, starting at 120 credits. All mutation examples below ran only against that isolated test database. The screenshots are genuine Playwright captures from that run.
 
@@ -253,7 +253,7 @@ Before production E2E can be completed, configure `VITE_API_BASE_URL` in the Ver
 - [Captured API network evidence](api-network.json) — observed HTTP methods, paths, statuses, and assertion records; secrets and API keys are excluded.
 - [Frontend repository](https://github.com/faizansaiyed123/frontend-intern-credits)
 - [Backend repository](https://github.com/faizansaiyed123/backend-intern-credits)
-- [Latest security-hardening E2E run](https://github.com/faizansaiyed123/frontend-intern-credits/actions/runs/40217571361) — 32 assertions passed, zero failed.
-- [Screenshot and test-evidence artifact](https://api.github.com/repos/faizansaiyed123/frontend-intern-credits/actions/artifacts/12607993501)
+- [Latest security-hardening E2E run](https://github.com/faizansaiyed123/frontend-intern-credits/actions/runs/40217791946) — 32 assertions passed, zero failed.
+- [Screenshot and test-evidence artifact](https://api.github.com/repos/faizansaiyed123/frontend-intern-credits/actions/artifacts/12607754388)
 
 The latest recorded integrated test is a successful full-stack verification of credit and authentication workflows in an isolated environment. It does **not** establish that the current Vercel deployment can reach a deployed backend or that production database writes are working; that remains blocked by the missing production API origin.
