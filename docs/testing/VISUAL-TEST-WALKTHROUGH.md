@@ -23,7 +23,7 @@ The main data tables are `users` (existing accounts), `credits` (the current bal
 
 ## What was actually verified
 
-The latest security-hardening run was [GitHub Actions run 40215245839](https://github.com/faizansaiyed123/frontend-intern-credits/actions/runs/40215245839), completed on 25 October 2026. It built the production frontend, started the actual FastAPI backend source, created a disposable PostgreSQL database, exercised the UI in Playwright Chromium without API mocks, and checked stored rows directly with SQL. The run completed **24 assertions with zero failures**, observed **21 browser API responses**, captured **14 screenshots**, and reported **zero uncaught browser JavaScript errors**. The screenshot and network evidence is also available in the [run's artifact](https://api.github.com/repos/faizansaiyed123/frontend-intern-credits/actions/artifacts/12607058652). The database and test identities were isolated from production.
+The latest security-hardening run was [GitHub Actions run 40216023896](https://github.com/faizansaiyed123/frontend-intern-credits/actions/runs/40216023896), completed on 25 October 2026. It built the production frontend, started the actual FastAPI backend source, created a disposable PostgreSQL database, exercised the UI in Playwright Chromium without API mocks, and checked stored rows directly with SQL. The run completed **26 assertions with zero failures**, observed **21 browser API responses**, captured **14 screenshots**, and reported **zero uncaught browser JavaScript errors**. The screenshot and network evidence is also available in the [run's artifact](https://api.github.com/repos/faizansaiyed123/frontend-intern-credits/actions/artifacts/12607806213). The database and test identities were isolated from production.
 
 The test account was synthetic: `user_id = 1`, starting at 120 credits. All mutation examples below ran only against that isolated test database. The screenshots are genuine Playwright captures from that run.
 
@@ -203,6 +203,8 @@ The integration run invoked the scheduler's actual `add_daily_credits()` functio
 | Session expiry/revocation | **Passed** | Logout revokes the session; token reuse returns 401 |
 | Authenticated own-account reads | **Passed** | Session-backed GET returned current balance |
 | Unauthenticated credit reads/writes | **Passed** | Both returned 401; balance stayed unchanged |
+| Failed sign-in rate limiting | **Passed** | Ten failed attempts are followed by HTTP 429 with a 15-minute cooldown persisted in PostgreSQL |
+| Explicit cross-account operator read | **Passed** | Ordinary session received 404; separate credit-operator key permitted the read |
 | Operator authorization for credit mutation | **Passed** | No key and wrong key returned 401; no balance mutation occurred |
 | Cross-account isolation | **Passed** | Ordinary session received 404 for another user's account |
 | Dashboard route and API health | **Passed** | `GET /healthz` returned 200 |
@@ -236,7 +238,7 @@ Before production E2E can be completed, configure `VITE_API_BASE_URL` in the Ver
 - **Authentication and authorization are now enforced in the checked-in source:** bearer sessions are required for credit reads, credit mutations require the separate `CREDIT_ADMIN_API_KEY`, and normal users are scoped to their own account. The integrated isolated-database run verified these guards. The shared operator key remains a privileged secret and must never be included in frontend build variables or committed to source control.
 - **Privileged schema changes are tightly restricted but remain sensitive:** `POST /api/schema/apply` accepts only a plain `CREATE INDEX` statement against an existing application table and allowlisted columns. It rejects `CREATE TABLE`, `ALTER TABLE`, table-copy/rename operations, unknown columns/tables, SQL comments, and multi-statement input. Structural schema changes belong in reviewed, versioned backend schema changes. Keep `ADMIN_API_KEY` separate from `CREDIT_ADMIN_API_KEY`, use a least-privileged database role, and restrict access to the endpoint. The latest E2E run tested rejection of DROP TABLE and multi-statement submissions; the additional DDL rejection cases are being added to the next run.
 - **No credit transaction ledger:** the schema stores the current balance and last-updated timestamp, not a durable audit record for each add/deduct/reset operation. The migration table is a schema-change log, not a credit history.
-- **Some edge cases remain untested:** negative/fractional/very large amounts, simultaneous balance updates, database constraint failures independent of API validation, SQL execution failure/rollback, missing admin-key configuration (HTTP 503), browser offline/CORS behavior, rate limiting against brute-force login attempts, email verification, self-service password reset, and the production scheduled job were not verified in the recorded run.
+- **Some edge cases remain untested:** negative/fractional/very large amounts, simultaneous balance updates, database constraint failures independent of API validation, SQL execution failure/rollback, missing admin-key configuration (HTTP 503), browser offline/CORS behavior, email verification, self-service password reset, and the production scheduled job were not verified in the recorded run.
 
 ## Evidence and source repositories
 
@@ -244,7 +246,7 @@ Before production E2E can be completed, configure `VITE_API_BASE_URL` in the Ver
 - [Captured API network evidence](api-network.json) — observed HTTP methods, paths, statuses, and assertion records; secrets and API keys are excluded.
 - [Frontend repository](https://github.com/faizansaiyed123/frontend-intern-credits)
 - [Backend repository](https://github.com/faizansaiyed123/backend-intern-credits)
-- [Latest security-hardening E2E run](https://github.com/faizansaiyed123/frontend-intern-credits/actions/runs/40215245839) — 24 assertions passed, zero failed.
+- [Latest security-hardening E2E run](https://github.com/faizansaiyed123/frontend-intern-credits/actions/runs/40216023896) — 26 assertions passed, zero failed.
 - [Screenshot and test-evidence artifact](https://api.github.com/repos/faizansaiyed123/frontend-intern-credits/actions/artifacts/12607058652)
 
 The latest recorded integrated test is a successful full-stack verification of credit and authentication workflows in an isolated environment. It does **not** establish that the current Vercel deployment can reach a deployed backend or that production database writes are working; that remains blocked by the missing production API origin.
