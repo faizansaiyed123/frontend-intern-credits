@@ -26,3 +26,17 @@ export interface ApplyMigrationResult {
 }
 
 export type CreditOperation = "add" | "deduct" | "reset";
+
+
+export interface AuthUser {
+  user_id: number;
+  email: string;
+  name: string;
+}
+
+export interface AuthResponse {
+  access_token: string;
+  token_type: "bearer";
+  expires_at: string;
+  user: AuthUser;
+}
