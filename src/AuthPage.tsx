@@ -1,4 +1,5 @@
-import { FormEvent, useState } from "react";
+import { useState } from "react";
+import type { FormEvent } from "react";
 import { ArrowLeft, ArrowRight, Coins, LockKeyhole, ShieldCheck } from "lucide-react";
 import { ApiError, loginAccount, registerAccount, setAccessToken } from "./api";
 import "./auth.css";
