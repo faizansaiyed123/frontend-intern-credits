@@ -113,29 +113,32 @@ export function getApiHealth(): Promise<ApiHealth> {
   return request<ApiHealth>("/healthz");
 }
 
-export function getCredits(userId: number): Promise<CreditAccount> {
-  return request<CreditAccount>(`/api/credits/${userId}`);
+export function getCredits(userId: number, adminKey = ""): Promise<CreditAccount> {
+  return request<CreditAccount>(`/api/credits/${userId}`, {
+    headers: adminKey ? { "X-API-Key": adminKey } : undefined,
+  });
 }
 
-export function addCredits(userId: number, amount: number): Promise<CreditAccount> {
+export function addCredits(userId: number, amount: number, adminKey: string): Promise<CreditAccount> {
   return request<CreditAccount>(`/api/credits/${userId}/add`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "X-API-Key": adminKey },
     body: JSON.stringify({ amount }),
   });
 }
 
-export function deductCredits(userId: number, amount: number): Promise<CreditAccount> {
+export function deductCredits(userId: number, amount: number, adminKey: string): Promise<CreditAccount> {
   return request<CreditAccount>(`/api/credits/${userId}/deduct`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "X-API-Key": adminKey },
     body: JSON.stringify({ amount }),
   });
 }
 
-export function resetCredits(userId: number): Promise<CreditAccount> {
+export function resetCredits(userId: number, adminKey: string): Promise<CreditAccount> {
   return request<CreditAccount>(`/api/credits/${userId}/reset`, {
     method: "PATCH",
+    headers: { "X-API-Key": adminKey },
   });
 }
 
