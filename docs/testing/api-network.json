@@ -1,131 +1,131 @@
 {
-  "runStartedAt": "2026-10-25T17:17:36.972Z",
+  "runStartedAt": "2026-10-25T17:19:14.430Z",
   "overallStatus": "PASSED",
   "apiOrigin": "http://127.0.0.1:8000",
   "note": "No API routes were mocked or intercepted. API keys and request headers are deliberately excluded.",
   "browserRequests": [
     {
-      "at": "2026-10-25T17:17:39.049Z",
+      "at": "2026-10-25T17:19:29.746Z",
       "method": "POST",
       "path": "/api/auth/register",
       "status": 201
     },
     {
-      "at": "2026-10-25T17:17:39.077Z",
+      "at": "2026-10-25T17:19:29.835Z",
       "method": "GET",
       "path": "/healthz",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:17:39.083Z",
+      "at": "2026-10-25T17:19:29.837Z",
       "method": "GET",
       "path": "/api/auth/me",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:17:39.092Z",
+      "at": "2026-10-25T17:19:29.850Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:17:39.266Z",
+      "at": "2026-10-25T17:19:30.101Z",
       "method": "GET",
       "path": "/healthz",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:17:39.267Z",
+      "at": "2026-10-25T17:19:30.103Z",
       "method": "GET",
       "path": "/api/auth/me",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:17:39.275Z",
+      "at": "2026-10-25T17:19:30.128Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:17:40.203Z",
+      "at": "2026-10-25T17:19:31.363Z",
       "method": "POST",
       "path": "/api/credits/1/add",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:17:40.482Z",
+      "at": "2026-10-25T17:19:31.768Z",
       "method": "GET",
       "path": "/healthz",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:17:40.482Z",
+      "at": "2026-10-25T17:19:31.791Z",
       "method": "GET",
       "path": "/api/auth/me",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:17:40.486Z",
+      "at": "2026-10-25T17:19:31.797Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:17:41.278Z",
+      "at": "2026-10-25T17:19:32.787Z",
       "method": "POST",
       "path": "/api/credits/1/deduct",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:17:42.154Z",
+      "at": "2026-10-25T17:19:33.872Z",
       "method": "PATCH",
       "path": "/api/credits/1/reset",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:17:42.719Z",
+      "at": "2026-10-25T17:19:34.707Z",
       "method": "GET",
       "path": "/api/credits/999999",
       "status": 404
     },
     {
-      "at": "2026-10-25T17:17:42.938Z",
+      "at": "2026-10-25T17:19:35.022Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:17:43.055Z",
+      "at": "2026-10-25T17:19:35.138Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 401
     },
     {
-      "at": "2026-10-25T17:17:43.221Z",
+      "at": "2026-10-25T17:19:35.372Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:17:43.637Z",
+      "at": "2026-10-25T17:19:35.838Z",
       "method": "POST",
       "path": "/api/schema/apply",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:17:43.641Z",
+      "at": "2026-10-25T17:19:35.843Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:17:43.987Z",
+      "at": "2026-10-25T17:19:36.210Z",
       "method": "POST",
       "path": "/api/schema/apply",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:17:43.993Z",
+      "at": "2026-10-25T17:19:36.215Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 200
@@ -159,13 +159,19 @@
       "actual": 401
     },
     {
-      "name": "Credit mutation without admin key",
+      "name": "Credit mutation without operator key",
       "status": 401,
       "expected": 401,
       "actual": 401
     },
     {
-      "name": "Credit mutation with incorrect admin key",
+      "name": "Credit mutation with incorrect key",
+      "status": 401,
+      "expected": 401,
+      "actual": 401
+    },
+    {
+      "name": "Credit mutation with schema-only key",
       "status": 401,
       "expected": 401,
       "actual": 401
@@ -187,6 +193,12 @@
       "status": 409,
       "expected": 409,
       "actual": 409
+    },
+    {
+      "name": "Schema migration list with credit-only key",
+      "status": 401,
+      "expected": 401,
+      "actual": 401
     },
     {
       "name": "Destructive migration SQL",
@@ -282,7 +294,7 @@
       "actual": "0"
     },
     {
-      "check": "Missing or incorrect admin key did not alter the balance",
+      "check": "Missing, incorrect, or schema-only key did not alter the balance",
       "status": "passed",
       "query": "SELECT credits FROM credits WHERE user_id = 1",
       "expected": "0",
@@ -361,7 +373,7 @@
     {
       "name": "A signed-in user still needs the administrator key to mutate credits",
       "status": "passed",
-      "evidence": "A valid session alone and a wrong administrator key cannot modify credit balances"
+      "evidence": "A valid session alone, incorrect key, and schema-only key cannot modify credit balances"
     },
     {
       "name": "An authenticated account cannot access another user's balance",

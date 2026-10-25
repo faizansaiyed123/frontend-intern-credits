@@ -1,7 +1,7 @@
 # Mintline integrated E2E verification report
 
 - Overall status: PASSED
-- Started at UTC: 2026-10-25T17:17:36.972Z
+- Started at UTC: 2026-10-25T17:19:14.430Z
 - Frontend: production Vite build served at http://127.0.0.1:4173
 - Backend: FastAPI main checkout at http://127.0.0.1:8000
 - Database: ephemeral PostgreSQL; direct verification via psql
@@ -23,7 +23,7 @@
 | PASSED | Backend rejects a zero-amount add without changing the database | POST amount=0 = 422; balance remains 0 |
 | PASSED | Backend rejects over-deduction even on direct API calls | POST deduct from zero = 400 Insufficient credits; balance remains 0 |
 | PASSED | Credit endpoints reject unauthenticated reads and writes | Read and write attempts without a bearer session return 401; balance is unchanged |
-| PASSED | A signed-in user still needs the administrator key to mutate credits | A valid session alone and a wrong administrator key cannot modify credit balances |
+| PASSED | A signed-in user still needs the administrator key to mutate credits | A valid session alone, incorrect key, and schema-only key cannot modify credit balances |
 | PASSED | An authenticated account cannot access another user's balance | A different existing user's account is concealed with HTTP 404 |
 | PASSED | Invalid passwords and duplicate registrations are rejected | Incorrect credentials return 401; duplicate email cannot create a second account |
 | PASSED | Missing user shows the real backend 404 in the frontend | GET /api/credits/999999 = 404; visible account-not-found message |
@@ -49,7 +49,7 @@
 | PASSED | Invalid amount did not alter balance | 0 | 0 |
 | PASSED | Over-deduction did not alter balance | 0 | 0 |
 | PASSED | Unauthenticated write did not alter the balance | 0 | 0 |
-| PASSED | Missing or incorrect admin key did not alter the balance | 0 | 0 |
+| PASSED | Missing, incorrect, or schema-only key did not alter the balance | 0 | 0 |
 | PASSED | Migration row is recorded in PostgreSQL | 1 | 1 |
 | PASSED | Submitted index exists in PostgreSQL | true | true |
 | PASSED | Scheduler increments existing and creates missing credit rows | 1:5 and 2:5 | 1:5
@@ -63,11 +63,13 @@
 | POST deduct above available balance | 400 | 400 | 400 |
 | Unauthenticated credit read | 401 | 401 | 401 |
 | Unauthenticated credit write | 401 | 401 | 401 |
-| Credit mutation without admin key | 401 | 401 | 401 |
-| Credit mutation with incorrect admin key | 401 | 401 | 401 |
+| Credit mutation without operator key | 401 | 401 | 401 |
+| Credit mutation with incorrect key | 401 | 401 | 401 |
+| Credit mutation with schema-only key | 401 | 401 | 401 |
 | Cross-account credit read | 404 | 404 | 404 |
 | Incorrect password | 401 | 401 | 401 |
 | Duplicate account registration | 409 | 409 | 409 |
+| Schema migration list with credit-only key | 401 | 401 | 401 |
 | Destructive migration SQL | 400 | 400 | 400 |
 | Multi-statement migration SQL | 400 | 400 | 400 |
 | CREATE TABLE AS SELECT | 400 | 400 | 400 |
