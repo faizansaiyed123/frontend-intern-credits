@@ -99,6 +99,7 @@ function Dashboard({ onGoHome, onLogout, onSessionExpired }: { onGoHome: () => v
   const [operationError, setOperationError] = useState("");
   const [notice, setNotice] = useState<Notice | null>(null);
 
+  const [creditAdminKey, setCreditAdminKey] = useState("");
   const [adminKey, setAdminKey] = useState("");
   const [migrations, setMigrations] = useState<SchemaMigration[] | null>(null);
   const [migrationLoading, setMigrationLoading] = useState(false);
@@ -110,14 +111,14 @@ function Dashboard({ onGoHome, onLogout, onSessionExpired }: { onGoHome: () => v
   const [applyLoading, setApplyLoading] = useState(false);
   const [adminNotice, setAdminNotice] = useState("");
 
-  const loadAccount = useCallback(async (userId: number) => {
+  const loadAccount = useCallback(async (userId: number, operatorKey = "") => {
     setAccountLoading(true);
     setAccountError("");
     setAccount(null);
     setActiveUserId(userId);
     setDraftUserId(String(userId));
     try {
-      const nextAccount = await getCredits(userId);
+      const nextAccount = await getCredits(userId, operatorKey);
       setAccount(nextAccount);
       setApiState("online");
     } catch (error) {
@@ -195,7 +196,7 @@ function Dashboard({ onGoHome, onLogout, onSessionExpired }: { onGoHome: () => v
       setAccount(null);
       return;
     }
-    void loadAccount(userId);
+    void loadAccount(userId, creditAdminKey.trim());
     setMobileNavOpen(false);
   }
 
@@ -209,6 +210,10 @@ function Dashboard({ onGoHome, onLogout, onSessionExpired }: { onGoHome: () => v
   async function submitOperation(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!activeOperation || !account) return;
+    if (!creditAdminKey.trim()) {
+      setOperationError("Enter the administrator API key to change a credit balance.");
+      return;
+    }
 
     const parsedAmount = Number(amount);
     if (activeOperation !== "reset" && (!Number.isSafeInteger(parsedAmount) || parsedAmount < 1)) {
@@ -226,11 +231,11 @@ function Dashboard({ onGoHome, onLogout, onSessionExpired }: { onGoHome: () => v
     try {
       let updated: CreditAccount;
       if (activeOperation === "add") {
-        updated = await addCredits(activeUserId, parsedAmount);
+        updated = await addCredits(activeUserId, parsedAmount, creditAdminKey.trim());
       } else if (activeOperation === "deduct") {
-        updated = await deductCredits(activeUserId, parsedAmount);
+        updated = await deductCredits(activeUserId, parsedAmount, creditAdminKey.trim());
       } else {
-        updated = await resetCredits(activeUserId);
+        updated = await resetCredits(activeUserId, creditAdminKey.trim());
       }
 
       setAccount(updated);
@@ -570,6 +575,19 @@ function Dashboard({ onGoHome, onLogout, onSessionExpired }: { onGoHome: () => v
                       <p className="operations-intro">Choose an action for account #{activeUserId}.</p>
                     </div>
                     <span className="snapshot-badge"><Coins size={16} /></span>
+                  </div>
+                  <div className="credit-admin-key">
+                    <label htmlFor="credit-admin-key">Administrator key required for changes</label>
+                    <input
+                      id="credit-admin-key"
+                      type="password"
+                      autoComplete="off"
+                      value={creditAdminKey}
+                      onChange={(event) => setCreditAdminKey(event.target.value)}
+                      placeholder="Enter key for this session"
+                      aria-describedby="credit-admin-key-help"
+                    />
+                    <span id="credit-admin-key-help">Balance changes require a trusted operator key. It stays in memory and is not saved to browser storage.</span>
                   </div>
                   <div className="actions-grid">
                     <button
