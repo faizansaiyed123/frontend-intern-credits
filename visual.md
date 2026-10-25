@@ -22,7 +22,7 @@ The overview brings your current balance, account ID, and last-updated time toge
 
 ![Add credits](docs/walkthrough/visuals/03-add-credits.png)
 
-Choose an amount and confirm the addition. Mintline sends the request to the credit service and displays the balance returned by the API.
+Choose an amount and confirm the addition. Credit changes require a trusted operator's administrator key in the workspace; the key is held in memory for that session and is not saved in browser storage. Mintline sends the request to the credit service and displays the balance returned by the API.
 
 ![Balance after addition](docs/walkthrough/visuals/04-balance-after-addition.png)
 
