@@ -552,6 +552,29 @@ async function run() {
     return "Ten invalid attempts trigger a 15-minute cooldown; the identifier is stored only as a one-way fingerprint";
   });
 
+  await verify("Repeated invalid registrations trigger a client-scoped cooldown", async () => {
+    sqlValue("DELETE FROM auth_login_attempts;");
+    const invalidRegistration = { email: "not-an-email", name: "Invalid E2E Registration", password: "E2E-Invalid-Registration-2026!" };
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      const response = await fetch(apiBaseUrl + "/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(invalidRegistration)
+      });
+      assert.equal(response.status, 422, "Invalid email should be rejected before the registration threshold is reached.");
+    }
+    const blocked = await fetch(apiBaseUrl + "/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(invalidRegistration)
+    });
+    assert.equal(blocked.status, 429);
+    assert.equal(blocked.headers.get("retry-after"), "900");
+    assert.equal(sqlValue("SELECT count(*) FROM auth_login_attempts WHERE attempts > 10 AND blocked_until > NOW();"), "1");
+    assert.equal(sqlValue("SELECT count(*) FROM users WHERE email='not-an-email';"), "0");
+    directApiChecks.push({ name: "Registration rate limit", status: blocked.status, expected: 429, actual: blocked.status });
+    return "Ten invalid sign-up attempts return 422; the next is rate-limited with HTTP 429 for 15 minutes, with no account created";
+  });
   await verify("Missing user shows the real backend 404 in the frontend", async () => {
     await page.getByLabel("User ID").fill("999999");
     await page.getByRole("button", { name: /Open account/i }).click();
