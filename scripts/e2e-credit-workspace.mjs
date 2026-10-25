@@ -656,6 +656,20 @@ async function run() {
     return "Second request was skipped; exactly one migration row remains";
   });
 
+  await verify("Concurrent duplicate migrations produce one atomic result", async () => {
+    const submit = () => fetch(apiBaseUrl + "/api/schema/apply", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-API-Key": adminKey },
+      body: JSON.stringify({ migration_name: "e2e_concurrent_migration", sql: "CREATE INDEX IF NOT EXISTS idx_e2e_concurrent_credits ON credits(user_id);" })
+    });
+    const responses = await Promise.all([submit(), submit()]);
+    assert.deepEqual(responses.map((response) => response.status), [200, 200]);
+    const results = await Promise.all(responses.map((response) => response.json()));
+    assert.deepEqual(results.map((result) => result.status).sort(), ["applied", "skipped"]);
+    assert.equal(sqlValue("SELECT count(*) FROM schema_migrations WHERE migration_name='e2e_concurrent_migration';"), "1");
+    assert.equal(sqlValue("SELECT (to_regclass('public.idx_e2e_concurrent_credits') IS NOT NULL)::text;"), "true");
+    return "Concurrent requests apply DDL once and record exactly one migration row";
+  });
   await verify("Production-built dashboard and navigation work at mobile width", async () => {
     const mobile = await browser.newPage({ viewport: { width: 390, height: 844 } });
     await mobile.goto(baseUrl + "/dashboard", { waitUntil: "networkidle" });
