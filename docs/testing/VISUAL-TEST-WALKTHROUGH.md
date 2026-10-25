@@ -6,7 +6,7 @@ Mintline is a focused credit-management workspace. This walkthrough follows the 
 
 ## The product at a glance
 
-The application keeps a deliberately small surface area: open an existing account, read its balance, add or deduct credits, reset a balance with confirmation, and use a guarded schema-migration screen. It does not invent an account directory, user registration, or credit transaction history that the backend does not provide.
+The application keeps a deliberately small surface area: create an account or sign in, read the signed-in account's balance, perform operator-authorized credit changes, reset a balance with confirmation, and use a separate guarded schema-migration screen. It does not invent a credit transaction history that the backend does not provide.
 
 ```mermaid
 flowchart LR
@@ -23,7 +23,7 @@ The main data tables are `users` (existing accounts), `credits` (the current bal
 
 ## What was actually verified
 
-The latest recorded integrated run was [GitHub Actions run 39945747732](https://github.com/faizansaiyed123/frontend-intern-credits/actions/runs/39945747732), completed on 23 October 2026. It built the production frontend, started the backend from the backend repository, created a disposable PostgreSQL database, exercised the UI in Playwright Chromium without API mocks, and checked the resulting rows directly with SQL. The run completed **18 assertions with zero failures**, observed **15 browser API responses**, and reported **zero uncaught browser JavaScript errors**.
+The latest security-hardening run was [GitHub Actions run 40215245839](https://github.com/faizansaiyed123/frontend-intern-credits/actions/runs/40215245839), completed on 25 October 2026. It built the production frontend, started the actual FastAPI backend source, created a disposable PostgreSQL database, exercised the UI in Playwright Chromium without API mocks, and checked stored rows directly with SQL. The run completed **24 assertions with zero failures**, observed **21 browser API responses**, captured **14 screenshots**, and reported **zero uncaught browser JavaScript errors**. The screenshot and network evidence is also available in the [run's artifact](https://api.github.com/repos/faizansaiyed123/frontend-intern-credits/actions/artifacts/12607058652). The database and test identities were isolated from production.
 
 The test account was synthetic: `user_id = 1`, starting at 120 credits. All mutation examples below ran only against that isolated test database. The screenshots are genuine Playwright captures from that run.
 
@@ -37,7 +37,25 @@ The homepage introduces the purpose of the workspace and points visitors to the 
 
 **What the verified flow does:** the browser navigates to `/dashboard`. The dashboard then calls the health endpoint and requests the selected account from the API.
 
-## 2. Open an existing account
+## 2. Create an account and start a session
+
+The account-entry page supports registration and sign-in. Registration requires a name, a syntactically valid email address, and a password of at least 12 characters. The backend hashes the password with a per-account random salt using PBKDF2-HMAC-SHA256; it does not store the submitted password in plain text.
+
+After successful registration or sign-in, the API returns an opaque bearer token. PostgreSQL stores only the SHA-256 hash of that token, alongside its expiry and revocation state. Sessions expire after eight hours, and signing out revokes the server-side session.
+
+**Verified in the latest run:** the registration UI called the actual API, PostgreSQL contained the new test user and a zero-credit row, and a SQL read-back confirmed the stored session value was the SHA-256 token hash rather than the bearer token itself. The tests also confirmed that an incorrect password returns HTTP 401, duplicate registration returns HTTP 409, and a revoked token cannot be reused.
+
+The current account flow does not yet provide email ownership verification or self-service password reset. Existing user rows created before password hashes were added need a trusted credential-provisioning process before those users can sign in.
+
+## 3. Account access and credit-operation authorization
+
+Credit balance reads require a valid bearer session. A normal user can read only their own account; selecting another user's account without the credit-operator credential returns HTTP 404 to avoid disclosing the other account's existence.
+
+Adding, deducting, or resetting credits requires both a valid session and the separate `CREDIT_ADMIN_API_KEY` in `X-API-Key`. This prevents a person from registering a normal account and using it to mint credits. The key is entered at runtime, held only in component memory, and must be re-entered after a page reload. Schema migrations use a different credential, `ADMIN_API_KEY`.
+
+The latest run verified that credit reads and writes without a session return HTTP 401, and that a signed-in user still cannot change a balance with no operator key or an incorrect key. It also verified that a normal session cannot read another user's balance.
+
+## 4. Open an existing account
 
 ![Dashboard with the starting balance](visuals/02-dashboard-initial-balance.png)
 
@@ -53,7 +71,7 @@ The dashboard displays the balance, account ID, last-updated timestamp, API conn
 
 The backend does not currently offer user creation or a user-directory endpoint. An ID must already exist in the `users` table.
 
-## 3. Add credits
+## 5. Add credits
 
 ![Add-credit dialog](visuals/03-add-credit-dialog.png)
 
@@ -74,7 +92,7 @@ The dashboard updates to **145 credits** after the successful response.
 
 This is a real write-and-read-back check, not an optimistic frontend-only counter.
 
-## 4. Deduct credits
+## 6. Deduct credits
 
 ![Deduct-credit dialog](visuals/05-deduct-credit-dialog.png)
 
@@ -93,7 +111,7 @@ The balance becomes **105 credits**.
 
 The backend's conditional SQL update only deducts when the stored balance is at least the requested amount. If no row is updated, it returns an insufficient-credits error.
 
-## 5. Reset a balance deliberately
+## 7. Reset a balance deliberately
 
 ![Reset confirmation dialog](visuals/07-reset-confirmation.png)
 
@@ -111,7 +129,7 @@ The account balance becomes **0 credits**.
 - Direct PostgreSQL read-back returned **0**.
 - The zero balance remained in place when the account was read again.
 
-## 6. See backend validation and error handling
+## 8. See backend validation and error handling
 
 ### Unknown account
 
@@ -132,7 +150,7 @@ The API was also called directly to ensure client-side validation is not the onl
 
 The frontend additionally checks that credit amounts are positive whole numbers and prevents an over-balance deduction in the dialog. The automated run directly verified the zero-amount and insufficient-balance cases; negative amounts, fractional values, extremely large values, and concurrent write races were not separately exercised.
 
-## 7. Open the privileged migration area
+## 9. Open the privileged migration area
 
 ![Admin key rejected](visuals/10-admin-unauthorized.png)
 
@@ -159,7 +177,7 @@ The test submitted a harmless, test-only index creation statement through the UI
 
 These schema changes were made in the disposable CI database, not in the production database. The migration screen can execute SQL using the database role configured on the backend, so it is a high-privilege control and should be restricted to trusted administrators. A UI confirmation is not a security boundary.
 
-## 8. Use the workspace on a narrow screen
+## 10. Use the workspace on a narrow screen
 
 ![Dashboard at mobile width](visuals/13-mobile-dashboard.png)
 
@@ -169,7 +187,7 @@ The production-built interface was also exercised at **390 × 844**. The account
 
 The mobile menu opens and exposes the main navigation. The E2E run confirmed the navigation was visible and the dashboard remained API-backed.
 
-## 9. Daily credit scheduler
+## 11. Daily credit scheduler
 
 The backend includes a daily scheduler set for **00:00 UTC**. Its job creates any missing credit rows for existing users and adds 5 credits to every credit row, updating the timestamp.
 
@@ -180,6 +198,13 @@ The integration run invoked the scheduler's actual `add_daily_credits()` functio
 | Feature / workflow | Status in isolated integrated run | Evidence or boundary |
 | --- | --- | --- |
 | Public homepage | **Passed** | Real browser screenshot and navigation |
+| Registration with password hashing | **Passed** | UI registration, zero-credit row, and password hash independently checked in PostgreSQL |
+| Login and invalid credentials | **Passed** | Invalid password returns 401; duplicate registration returns 409 |
+| Session expiry/revocation | **Passed** | Logout revokes the session; token reuse returns 401 |
+| Authenticated own-account reads | **Passed** | Session-backed GET returned current balance |
+| Unauthenticated credit reads/writes | **Passed** | Both returned 401; balance stayed unchanged |
+| Operator authorization for credit mutation | **Passed** | No key and wrong key returned 401; no balance mutation occurred |
+| Cross-account isolation | **Passed** | Ordinary session received 404 for another user's account |
 | Dashboard route and API health | **Passed** | `GET /healthz` returned 200 |
 | Existing account lookup and balance display | **Passed** | `GET /api/credits/1`, initial balance 120 |
 | Refresh and read-after-write | **Passed** | Reload re-read the stored balance |
@@ -193,6 +218,7 @@ The integration run invoked the scheduler's actual `add_daily_credits()` functio
 | Migration history with correct key | **Passed** | API returned 200 with database-backed history |
 | Apply a migration | **Passed** | Test index and migration record independently queried |
 | Repeated migration name | **Passed** | Duplicate was skipped; one record remained |
+| Destructive/multi-statement schema SQL | **Passed** | DROP TABLE and multi-statement submissions were rejected; the `credits` table remained |
 | Scheduler function and missing credit row | **Passed** | Direct SQL read-back on isolated PostgreSQL |
 | Mobile dashboard and navigation | **Passed** | 390 × 844 browser viewport |
 | Browser JavaScript errors | **Passed** | No uncaught page errors in the run |
@@ -207,10 +233,10 @@ Before production E2E can be completed, configure `VITE_API_BASE_URL` in the Ver
 
 ## Important implementation boundaries
 
-- **No login or user-ownership checks on credit endpoints:** the current backend code does not require authentication for `GET /api/credits/{user_id}`, `POST .../add`, `POST .../deduct`, or `PATCH .../reset`. Knowing an ID is not authorization. Do not treat these routes as safe for real user balances until authentication, per-user authorization, and appropriate abuse controls are added.
-- **Privileged schema execution:** `POST /api/schema/apply` executes submitted SQL using the backend database role. Keep the admin key out of frontend build variables and source code, use a least-privileged database role, and restrict access to this endpoint.
+- **Authentication and authorization are now enforced in the checked-in source:** bearer sessions are required for credit reads, credit mutations require the separate `CREDIT_ADMIN_API_KEY`, and normal users are scoped to their own account. The integrated isolated-database run verified these guards. The shared operator key remains a privileged secret and must never be included in frontend build variables or committed to source control.
+- **Privileged schema changes are restricted but remain sensitive:** `POST /api/schema/apply` accepts a single non-destructive CREATE/ALTER TABLE, INDEX, or SEQUENCE statement and rejects common destructive SQL and multi-statement input. It still executes DDL using the database role, so keep `ADMIN_API_KEY` separate from `CREDIT_ADMIN_API_KEY`, use a least-privileged database role, and restrict access to the endpoint. The security-hardening run verified rejection of DROP TABLE and multi-statement submissions.
 - **No credit transaction ledger:** the schema stores the current balance and last-updated timestamp, not a durable audit record for each add/deduct/reset operation. The migration table is a schema-change log, not a credit history.
-- **Some edge cases remain untested:** negative/fractional/very large amounts, simultaneous balance updates, database constraint failures independent of API validation, invalid SQL rollback, missing admin configuration (HTTP 503), browser offline/CORS behavior, and the production scheduled job were not verified in the recorded run.
+- **Some edge cases remain untested:** negative/fractional/very large amounts, simultaneous balance updates, database constraint failures independent of API validation, SQL execution failure/rollback, missing admin-key configuration (HTTP 503), browser offline/CORS behavior, rate limiting against brute-force login attempts, email verification, self-service password reset, and the production scheduled job were not verified in the recorded run.
 
 ## Evidence and source repositories
 
@@ -218,6 +244,7 @@ Before production E2E can be completed, configure `VITE_API_BASE_URL` in the Ver
 - [Captured API network evidence](api-network.json) — observed HTTP methods, paths, statuses, and assertion records; secrets and API keys are excluded.
 - [Frontend repository](https://github.com/faizansaiyed123/frontend-intern-credits)
 - [Backend repository](https://github.com/faizansaiyed123/backend-intern-credits)
-- [Integrated GitHub Actions run](https://github.com/faizansaiyed123/frontend-intern-credits/actions/runs/39945747732)
+- [Latest security-hardening E2E run](https://github.com/faizansaiyed123/frontend-intern-credits/actions/runs/40215245839) — 24 assertions passed, zero failed.
+- [Screenshot and test-evidence artifact](https://api.github.com/repos/faizansaiyed123/frontend-intern-credits/actions/artifacts/12607058652)
 
-The recorded integrated test is a successful full-stack verification of the implemented credit workflows in an isolated environment. It does **not** establish that the current Vercel deployment can reach a deployed backend or that production database writes are working; that remains blocked by the missing production API origin.
+The latest recorded integrated test is a successful full-stack verification of credit and authentication workflows in an isolated environment. It does **not** establish that the current Vercel deployment can reach a deployed backend or that production database writes are working; that remains blocked by the missing production API origin.
