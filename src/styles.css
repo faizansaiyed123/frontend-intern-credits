@@ -672,3 +672,42 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .operations-panel .operation-arrow { display: grid; }
   .operations-note { margin-top: 14px; padding-top: 12px; }
 }
+
+
+/* Runtime-only operator credential for privileged credit operations. */
+.credit-admin-key {
+  display: grid;
+  gap: 7px;
+  margin: 18px 0 18px;
+  padding: 15px 16px;
+  border: 1px solid #e1e7df;
+  border-radius: 12px;
+  background: #f8faf7;
+}
+.credit-admin-key label {
+  color: #35473a;
+  font-size: 12px;
+  font-weight: 700;
+}
+.credit-admin-key input {
+  width: 100%;
+  min-height: 42px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border: 1px solid #dbe3da;
+  border-radius: 9px;
+  color: #23352a;
+  background: #fff;
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+}
+.credit-admin-key input:focus {
+  border-color: #438961;
+  box-shadow: 0 0 0 3px rgba(67,137,97,.12);
+}
+.credit-admin-key span {
+  color: #7d897e;
+  font-size: 11px;
+  line-height: 1.5;
+}
