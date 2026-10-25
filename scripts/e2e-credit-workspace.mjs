@@ -13,6 +13,7 @@ const baseUrl = process.env.E2E_BASE_URL || "http://127.0.0.1:4173";
 const apiBaseUrl = (process.env.VITE_API_BASE_URL || "http://127.0.0.1:8000").replace(/\/+$/, "");
 const apiOrigin = new URL(apiBaseUrl).origin;
 const adminKey = process.env.ADMIN_API_KEY;
+const creditAdminKey = process.env.CREDIT_ADMIN_API_KEY;
 const psqlUrl = process.env.PSQL_URL;
 const startedAt = new Date().toISOString();
 const checks = [];
@@ -250,6 +251,7 @@ async function writeReports(status, reason) {
 
 async function run() {
   assert.ok(adminKey, "ADMIN_API_KEY was not configured for this test backend.");
+  assert.ok(creditAdminKey, "CREDIT_ADMIN_API_KEY was not configured for this test backend.");
   assert.ok(psqlUrl, "PSQL_URL was not configured for direct database verification.");
   browser = await chromium.launch({ headless: true, channel: "chrome" });
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1 });
@@ -305,7 +307,7 @@ async function run() {
     sqlValue("UPDATE credits SET credits=120, last_updated=NOW() WHERE user_id=1;");
     await page.reload({ waitUntil: "networkidle" });
     await waitForBalance(page, 120);
-    await page.locator("#credit-admin-key").fill(adminKey);
+    await page.locator("#credit-admin-key").fill(creditAdminKey);
     await page.getByText("API connected", { exact: true }).first().waitFor({ state: "visible" });
     expectApi("GET", "/healthz", 200);
     expectApi("POST", "/api/auth/register", 201);
@@ -371,7 +373,7 @@ async function run() {
   await verify("Backend rejects a zero-amount add without changing the database", async () => {
     const response = await fetch(apiBaseUrl + "/api/credits/1/add", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json", Authorization: "Bearer " + testToken, "X-API-Key": adminKey },
+      headers: { "Content-Type": "application/json", Accept: "application/json", Authorization: "Bearer " + testToken, "X-API-Key": creditAdminKey },
       body: JSON.stringify({ amount: 0 })
     });
     const body = await response.text();
@@ -384,7 +386,7 @@ async function run() {
   await verify("Backend rejects over-deduction even on direct API calls", async () => {
     const response = await fetch(apiBaseUrl + "/api/credits/1/deduct", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json", Authorization: "Bearer " + testToken, "X-API-Key": adminKey },
+      headers: { "Content-Type": "application/json", Accept: "application/json", Authorization: "Bearer " + testToken, "X-API-Key": creditAdminKey },
       body: JSON.stringify({ amount: 1 })
     });
     const body = await response.text();
