@@ -277,7 +277,8 @@ async function run() {
   await verify("PostgreSQL schema contains authentication fields and revocable sessions", async () => {
     assert.equal(sqlValue("SELECT count(*) FROM information_schema.columns WHERE table_name='users' AND column_name='password_hash';"), "1");
     assert.equal(sqlValue("SELECT count(*) FROM information_schema.tables WHERE table_name='auth_sessions';"), "1");
-    return "password hash column and auth_sessions table exist";
+    assert.equal(sqlValue("SELECT count(*) FROM information_schema.tables WHERE table_name='auth_login_attempts';"), "1");
+    return "password hash, revocable sessions, and sign-in throttling tables exist";
   });
 
   await verify("Public homepage renders", async () => {
