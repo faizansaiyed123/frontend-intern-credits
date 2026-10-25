@@ -7,7 +7,7 @@ import "./home.css";
 interface HomePageProps { onOpenDashboard: () => void; }
 
 const capabilities = [
-  { number: "01", icon: Coins, title: "Read the real balance", description: "Look up an existing user and read the credit balance and last update directly from your API.", endpoint: "GET /api/credits/{user_id}", tone: "mint" },
+  { number: "01", icon: Coins, title: "Read the real balance", description: "Review your own balance and last-updated time from the connected API.", endpoint: "GET /api/credits/{user_id}", tone: "mint" },
   { number: "02", icon: Zap, title: "Make controlled changes", description: "Add credits, deduct credits, or reset a balance. The UI updates from the API response.", endpoint: "POST · PATCH /api/credits", tone: "sand" },
   { number: "03", icon: Database, title: "Manage schema migrations", description: "Review migration records and access the existing admin-only schema endpoints with your API key.", endpoint: "GET · POST /api/schema", tone: "lilac" },
 ];
@@ -48,8 +48,8 @@ export default function HomePage({ onOpenDashboard }: HomePageProps) {
               <div className="home-eyebrow"><span /> A CLEARER WAY TO MANAGE CREDITS</div>
               <h1>Credit operations,<br /><span>without the clutter.</span></h1>
               <p className="home-hero-description">
-                A focused interface for your credit-management API. Look up balances,
-                apply credit changes, and manage schema migrations—using the backend you already have.
+                A focused interface for your credit-management API. Sign in to review your balance
+                and apply controlled credit changes through the connected backend.
               </p>
               <div className="home-hero-actions">
                 <button type="button" className="home-primary-cta" onClick={onOpenDashboard}>
@@ -135,7 +135,7 @@ export default function HomePage({ onOpenDashboard }: HomePageProps) {
           </div>
           <div className="home-truth-note">
             <div className="truth-note-icon"><Check size={17} /></div>
-            <p><strong>Designed around the real contract.</strong> The backend does not currently expose user creation or transaction history, so this interface does not pretend those features exist.</p>
+            <p><strong>Designed around the real contract.</strong> Accounts have their own sign-in session. Credit operations are restricted to the authenticated account; the service does not expose a credit transaction history.</p>
           </div>
         </section>
 
@@ -148,7 +148,7 @@ export default function HomePage({ onOpenDashboard }: HomePageProps) {
           </div>
           <div className="home-flow-card">
             <div className="home-flow-heading"><span className="home-flow-heading-icon"><Database size={18} /></span><span><strong>Request flow</strong><small>How the workspace works</small></span></div>
-            <div className="home-flow-step"><span className="home-flow-step-number">01</span><div><strong>Choose an existing user</strong><small>Look up by user ID</small></div><span className="home-flow-tag">INPUT</span></div>
+            <div className="home-flow-step"><span className="home-flow-step-number">01</span><div><strong>Sign in to your account</strong><small>Load your account securely</small></div><span className="home-flow-tag">INPUT</span></div>
             <div className="home-flow-connector"><span /></div>
             <div className="home-flow-step"><span className="home-flow-step-number">02</span><div><strong>Call the credit API</strong><small>Read or mutate the balance</small></div><span className="home-flow-tag">FASTAPI</span></div>
             <div className="home-flow-connector"><span /></div>
