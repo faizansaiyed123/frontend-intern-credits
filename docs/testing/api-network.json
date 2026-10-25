@@ -1,131 +1,131 @@
 {
-  "runStartedAt": "2026-10-25T17:41:07.688Z",
+  "runStartedAt": "2026-10-25T17:43:57.713Z",
   "overallStatus": "PASSED",
   "apiOrigin": "http://127.0.0.1:8000",
   "note": "No API routes were mocked or intercepted. API keys and request headers are deliberately excluded.",
   "browserRequests": [
     {
-      "at": "2026-10-25T17:41:16.406Z",
+      "at": "2026-10-25T17:44:00.899Z",
       "method": "POST",
       "path": "/api/auth/register",
       "status": 201
     },
     {
-      "at": "2026-10-25T17:41:16.461Z",
+      "at": "2026-10-25T17:44:00.944Z",
       "method": "GET",
       "path": "/healthz",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:41:16.463Z",
+      "at": "2026-10-25T17:44:00.963Z",
       "method": "GET",
       "path": "/api/auth/me",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:41:16.471Z",
+      "at": "2026-10-25T17:44:00.972Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:41:16.666Z",
+      "at": "2026-10-25T17:44:01.190Z",
       "method": "GET",
       "path": "/healthz",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:41:16.667Z",
+      "at": "2026-10-25T17:44:01.198Z",
       "method": "GET",
       "path": "/api/auth/me",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:41:16.680Z",
+      "at": "2026-10-25T17:44:01.208Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:41:17.615Z",
+      "at": "2026-10-25T17:44:02.421Z",
       "method": "POST",
       "path": "/api/credits/1/add",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:41:17.881Z",
+      "at": "2026-10-25T17:44:02.807Z",
       "method": "GET",
       "path": "/healthz",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:41:17.882Z",
+      "at": "2026-10-25T17:44:02.809Z",
       "method": "GET",
       "path": "/api/auth/me",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:41:17.895Z",
+      "at": "2026-10-25T17:44:02.826Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:41:18.710Z",
+      "at": "2026-10-25T17:44:03.914Z",
       "method": "POST",
       "path": "/api/credits/1/deduct",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:41:19.473Z",
+      "at": "2026-10-25T17:44:04.940Z",
       "method": "PATCH",
       "path": "/api/credits/1/reset",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:41:20.770Z",
+      "at": "2026-10-25T17:44:06.812Z",
       "method": "GET",
       "path": "/api/credits/999999",
       "status": 404
     },
     {
-      "at": "2026-10-25T17:41:20.994Z",
+      "at": "2026-10-25T17:44:07.147Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:41:21.086Z",
+      "at": "2026-10-25T17:44:07.266Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 401
     },
     {
-      "at": "2026-10-25T17:41:21.254Z",
+      "at": "2026-10-25T17:44:07.481Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:41:21.672Z",
+      "at": "2026-10-25T17:44:07.962Z",
       "method": "POST",
       "path": "/api/schema/apply",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:41:21.674Z",
+      "at": "2026-10-25T17:44:07.966Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:41:21.955Z",
+      "at": "2026-10-25T17:44:08.331Z",
       "method": "POST",
       "path": "/api/schema/apply",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:41:21.957Z",
+      "at": "2026-10-25T17:44:08.336Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 200

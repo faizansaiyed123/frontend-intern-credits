@@ -1,7 +1,7 @@
 # Mintline integrated E2E verification report
 
 - Overall status: PASSED
-- Started at UTC: 2026-10-25T17:41:07.688Z
+- Started at UTC: 2026-10-25T17:43:57.713Z
 - Frontend: production Vite build served at http://127.0.0.1:4173
 - Backend: FastAPI main checkout at http://127.0.0.1:8000
 - Database: ephemeral PostgreSQL; direct verification via psql
