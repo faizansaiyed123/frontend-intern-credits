@@ -1,99 +1,131 @@
 {
-  "runStartedAt": "2026-10-25T16:39:06.596Z",
+  "runStartedAt": "2026-10-25T17:12:20.010Z",
   "overallStatus": "PASSED",
   "apiOrigin": "http://127.0.0.1:8000",
   "note": "No API routes were mocked or intercepted. API keys and request headers are deliberately excluded.",
   "browserRequests": [
     {
-      "at": "2026-10-25T16:39:08.665Z",
+      "at": "2026-10-25T17:12:21.967Z",
+      "method": "POST",
+      "path": "/api/auth/register",
+      "status": 201
+    },
+    {
+      "at": "2026-10-25T17:12:21.989Z",
       "method": "GET",
       "path": "/healthz",
       "status": 200
     },
     {
-      "at": "2026-10-25T16:39:08.667Z",
+      "at": "2026-10-25T17:12:21.994Z",
+      "method": "GET",
+      "path": "/api/auth/me",
+      "status": 200
+    },
+    {
+      "at": "2026-10-25T17:12:22.002Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T16:39:09.241Z",
+      "at": "2026-10-25T17:12:22.198Z",
+      "method": "GET",
+      "path": "/healthz",
+      "status": 200
+    },
+    {
+      "at": "2026-10-25T17:12:22.198Z",
+      "method": "GET",
+      "path": "/api/auth/me",
+      "status": 200
+    },
+    {
+      "at": "2026-10-25T17:12:22.212Z",
+      "method": "GET",
+      "path": "/api/credits/1",
+      "status": 200
+    },
+    {
+      "at": "2026-10-25T17:12:23.245Z",
       "method": "POST",
       "path": "/api/credits/1/add",
-      "status": 200,
-      "requestBody": "{\"amount\":25}"
+      "status": 200
     },
     {
-      "at": "2026-10-25T16:39:09.526Z",
+      "at": "2026-10-25T17:12:23.542Z",
       "method": "GET",
       "path": "/healthz",
       "status": 200
     },
     {
-      "at": "2026-10-25T16:39:09.526Z",
+      "at": "2026-10-25T17:12:23.543Z",
+      "method": "GET",
+      "path": "/api/auth/me",
+      "status": 200
+    },
+    {
+      "at": "2026-10-25T17:12:23.547Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T16:39:10.342Z",
+      "at": "2026-10-25T17:12:24.360Z",
       "method": "POST",
       "path": "/api/credits/1/deduct",
-      "status": 200,
-      "requestBody": "{\"amount\":40}"
+      "status": 200
     },
     {
-      "at": "2026-10-25T16:39:11.099Z",
+      "at": "2026-10-25T17:12:25.219Z",
       "method": "PATCH",
       "path": "/api/credits/1/reset",
       "status": 200
     },
     {
-      "at": "2026-10-25T16:39:11.434Z",
+      "at": "2026-10-25T17:12:25.850Z",
       "method": "GET",
       "path": "/api/credits/999999",
       "status": 404
     },
     {
-      "at": "2026-10-25T16:39:11.649Z",
+      "at": "2026-10-25T17:12:26.100Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T16:39:11.782Z",
+      "at": "2026-10-25T17:12:26.218Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 401
     },
     {
-      "at": "2026-10-25T16:39:11.964Z",
+      "at": "2026-10-25T17:12:26.401Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 200
     },
     {
-      "at": "2026-10-25T16:39:12.399Z",
+      "at": "2026-10-25T17:12:26.834Z",
       "method": "POST",
       "path": "/api/schema/apply",
-      "status": 200,
-      "requestBody": "{\"migration_name\":\"e2e_verified_credits_index\",\"sql\":\"CREATE INDEX IF NOT EXISTS idx_e2e_credits_last_updated ON credits(last_updated DESC);\"}"
+      "status": 200
     },
     {
-      "at": "2026-10-25T16:39:12.401Z",
+      "at": "2026-10-25T17:12:26.837Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 200
     },
     {
-      "at": "2026-10-25T16:39:12.683Z",
+      "at": "2026-10-25T17:12:27.150Z",
       "method": "POST",
       "path": "/api/schema/apply",
-      "status": 200,
-      "requestBody": "{\"migration_name\":\"e2e_verified_credits_index\",\"sql\":\"CREATE INDEX IF NOT EXISTS idx_e2e_credits_last_updated ON credits(last_updated DESC);\"}"
+      "status": 200
     },
     {
-      "at": "2026-10-25T16:39:12.685Z",
+      "at": "2026-10-25T17:12:27.155Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 200
@@ -113,6 +145,72 @@
       "expected": 400,
       "actual": 400,
       "detail": "{\"detail\":\"Insufficient credits\"}"
+    },
+    {
+      "name": "Unauthenticated credit read",
+      "status": 401,
+      "expected": 401,
+      "actual": 401
+    },
+    {
+      "name": "Unauthenticated credit write",
+      "status": 401,
+      "expected": 401,
+      "actual": 401
+    },
+    {
+      "name": "Credit mutation without admin key",
+      "status": 401,
+      "expected": 401,
+      "actual": 401
+    },
+    {
+      "name": "Credit mutation with incorrect admin key",
+      "status": 401,
+      "expected": 401,
+      "actual": 401
+    },
+    {
+      "name": "Cross-account credit read",
+      "status": 404,
+      "expected": 404,
+      "actual": 404
+    },
+    {
+      "name": "Incorrect password",
+      "status": 401,
+      "expected": 401,
+      "actual": 401
+    },
+    {
+      "name": "Duplicate account registration",
+      "status": 409,
+      "expected": 409,
+      "actual": 409
+    },
+    {
+      "name": "Destructive migration SQL",
+      "status": 400,
+      "expected": 400,
+      "actual": 400
+    },
+    {
+      "name": "Multi-statement migration SQL",
+      "status": 400,
+      "expected": 400,
+      "actual": 400
+    },
+    {
+      "name": "Session logout",
+      "status": 200,
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "name": "Revoked session reuse",
+      "status": 401,
+      "expected": 401,
+      "actual": 401
     }
   ],
   "databaseChecks": [
@@ -159,6 +257,20 @@
       "actual": "0"
     },
     {
+      "check": "Unauthenticated write did not alter the balance",
+      "status": "passed",
+      "query": "SELECT credits FROM credits WHERE user_id = 1",
+      "expected": "0",
+      "actual": "0"
+    },
+    {
+      "check": "Missing or incorrect admin key did not alter the balance",
+      "status": "passed",
+      "query": "SELECT credits FROM credits WHERE user_id = 1",
+      "expected": "0",
+      "actual": "0"
+    },
+    {
       "check": "Migration row is recorded in PostgreSQL",
       "status": "passed",
       "expected": "1",
@@ -179,9 +291,9 @@
   ],
   "assertions": [
     {
-      "name": "PostgreSQL contains a queryable seeded test account",
+      "name": "PostgreSQL schema contains authentication fields and revocable sessions",
       "status": "passed",
-      "evidence": "user_id 1 starts at 120 credits in PostgreSQL"
+      "evidence": "password hash column and auth_sessions table exist"
     },
     {
       "name": "Public homepage renders",
@@ -191,7 +303,7 @@
     {
       "name": "Opening the dashboard calls live health and account endpoints",
       "status": "passed",
-      "evidence": "GET /healthz = 200; GET /api/credits/1 = 200; UI balance = 120"
+      "evidence": "Account registered; hashed session persisted; authenticated balance read = 120"
     },
     {
       "name": "Adding 25 credits updates the UI and the actual database row",
@@ -201,7 +313,7 @@
     {
       "name": "Reloading re-reads the persisted account balance",
       "status": "passed",
-      "evidence": "Browser reload reads 145 through the backend"
+      "evidence": "Browser reload reads 145 through the backend; privileged key is not persisted"
     },
     {
       "name": "Deducting 40 credits updates the UI and the actual database row",
@@ -224,6 +336,26 @@
       "evidence": "POST deduct from zero = 400 Insufficient credits; balance remains 0"
     },
     {
+      "name": "Credit endpoints reject unauthenticated reads and writes",
+      "status": "passed",
+      "evidence": "Read and write attempts without a bearer session return 401; balance is unchanged"
+    },
+    {
+      "name": "A signed-in user still needs the administrator key to mutate credits",
+      "status": "passed",
+      "evidence": "A valid session alone and a wrong administrator key cannot modify credit balances"
+    },
+    {
+      "name": "An authenticated account cannot access another user's balance",
+      "status": "passed",
+      "evidence": "A different existing user's account is concealed with HTTP 404"
+    },
+    {
+      "name": "Invalid passwords and duplicate registrations are rejected",
+      "status": "passed",
+      "evidence": "Incorrect credentials return 401; duplicate email cannot create a second account"
+    },
+    {
       "name": "Missing user shows the real backend 404 in the frontend",
       "status": "passed",
       "evidence": "GET /api/credits/999999 = 404; visible account-not-found message"
@@ -244,6 +376,11 @@
       "evidence": "POST /api/schema/apply = 200; SQL confirms the index and exactly one migration record"
     },
     {
+      "name": "Migration API rejects destructive and multi-statement SQL",
+      "status": "passed",
+      "evidence": "DROP TABLE and multi-statement submissions are rejected; credits table remains"
+    },
+    {
       "name": "Repeated migration name is idempotently skipped",
       "status": "passed",
       "evidence": "Second request was skipped; exactly one migration row remains"
@@ -252,6 +389,11 @@
       "name": "Production-built dashboard and navigation work at mobile width",
       "status": "passed",
       "evidence": "390×844 viewport rendered; account was loaded through GET /api/credits/1"
+    },
+    {
+      "name": "Logout revokes the active database session",
+      "status": "passed",
+      "evidence": "Logout revokes the server-side session; reuse of the old token returns 401"
     },
     {
       "name": "Daily scheduler logic updates the isolated database",
@@ -266,7 +408,7 @@
     {
       "name": "All implemented frontend API operations were observed against the real backend",
       "status": "passed",
-      "evidence": "15 browser-observed HTTP responses; no API route mocks"
+      "evidence": "21 browser-observed HTTP responses; no API route mocks"
     }
   ],
   "browserErrors": [],
