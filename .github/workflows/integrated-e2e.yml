@@ -100,8 +100,9 @@ jobs:
           nohup python -m uvicorn src.main:app --host 127.0.0.1 --port 8000 > /tmp/mintline-backend.log 2>&1 < /dev/null &
           echo $! > /tmp/mintline-backend.pid
           for attempt in $(seq 1 60); do
-            if curl -fsS http://127.0.0.1:8000/healthz >/dev/null && curl -fsS http://127.0.0.1:8000/api/credits/1 >/dev/null; then
-              echo "Backend health and database-backed account endpoint are ready."
+            # Credit routes now require a valid session, so readiness must use the public health endpoint.
+            if curl -fsS http://127.0.0.1:8000/healthz >/dev/null; then
+              echo "Backend health endpoint is ready."
               exit 0
             fi
             sleep 1
