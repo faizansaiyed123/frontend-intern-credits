@@ -410,6 +410,25 @@ async function run() {
     return "Read and write attempts without a bearer session return 401; balance is unchanged";
   });
 
+  await verify("A signed-in user still needs the administrator key to mutate credits", async () => {
+    const missing = await fetch(apiBaseUrl + "/api/credits/1/add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + testToken },
+      body: JSON.stringify({ amount: 1 })
+    });
+    assert.equal(missing.status, 401);
+    const incorrect = await fetch(apiBaseUrl + "/api/credits/1/add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + testToken, "X-API-Key": "incorrect-e2e-key" },
+      body: JSON.stringify({ amount: 1 })
+    });
+    assert.equal(incorrect.status, 401);
+    await assertDatabaseBalance(0, "Missing or incorrect admin key did not alter the balance");
+    directApiChecks.push({ name: "Credit mutation without admin key", status: missing.status, expected: 401, actual: missing.status });
+    directApiChecks.push({ name: "Credit mutation with incorrect admin key", status: incorrect.status, expected: 401, actual: incorrect.status });
+    return "A valid session alone and a wrong administrator key cannot modify credit balances";
+  });
+
   await verify("An authenticated account cannot access another user's balance", async () => {
     sqlValue("INSERT INTO users (user_id, email, name) VALUES (2, 'other-e2e@example.invalid', 'Other User') ON CONFLICT (user_id) DO NOTHING;");
     const response = await fetch(apiBaseUrl + "/api/credits/2", {
