@@ -6,6 +6,10 @@ A polished public homepage and responsive React + TypeScript dashboard for the [
 
 Explore the [Mintline visual walkthrough](visual.md) for the homepage, account overview, credit operations, migration history, and mobile experience.
 
+For the step-by-step browser/API/database results, see the [Visual Full-Stack Testing Walkthrough](docs/testing/VISUAL-TEST-WALKTHROUGH.md), which includes genuine screenshots, test coverage, read-after-write checks, and current limitations.
+
+**Deployment note (checked 25 October 2026):** the production Vercel bundle currently falls back to `http://localhost:8000` because `VITE_API_BASE_URL` is not configured in the Vercel project. The UI is served, but production browser-to-API integration remains blocked until the actual deployed API origin is configured and reverified. See the walkthrough for evidence.
+
 ## Features
 
 - Live account balance and last-updated timestamp from the API.
