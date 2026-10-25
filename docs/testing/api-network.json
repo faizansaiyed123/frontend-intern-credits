@@ -1,131 +1,131 @@
 {
-  "runStartedAt": "2026-10-25T17:22:10.364Z",
+  "runStartedAt": "2026-10-25T17:32:33.113Z",
   "overallStatus": "PASSED",
   "apiOrigin": "http://127.0.0.1:8000",
   "note": "No API routes were mocked or intercepted. API keys and request headers are deliberately excluded.",
   "browserRequests": [
     {
-      "at": "2026-10-25T17:22:23.421Z",
+      "at": "2026-10-25T17:32:35.540Z",
       "method": "POST",
       "path": "/api/auth/register",
       "status": 201
     },
     {
-      "at": "2026-10-25T17:22:23.479Z",
+      "at": "2026-10-25T17:32:35.577Z",
       "method": "GET",
       "path": "/healthz",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:22:23.481Z",
+      "at": "2026-10-25T17:32:35.579Z",
       "method": "GET",
       "path": "/api/auth/me",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:22:23.489Z",
+      "at": "2026-10-25T17:32:35.595Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:22:23.750Z",
+      "at": "2026-10-25T17:32:35.832Z",
       "method": "GET",
       "path": "/healthz",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:22:23.755Z",
+      "at": "2026-10-25T17:32:35.839Z",
       "method": "GET",
       "path": "/api/auth/me",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:22:23.779Z",
+      "at": "2026-10-25T17:32:35.848Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:22:25.011Z",
+      "at": "2026-10-25T17:32:36.940Z",
       "method": "POST",
       "path": "/api/credits/1/add",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:22:25.385Z",
+      "at": "2026-10-25T17:32:37.304Z",
       "method": "GET",
       "path": "/healthz",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:22:25.391Z",
+      "at": "2026-10-25T17:32:37.315Z",
       "method": "GET",
       "path": "/api/auth/me",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:22:25.398Z",
+      "at": "2026-10-25T17:32:37.327Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:22:26.430Z",
+      "at": "2026-10-25T17:32:38.325Z",
       "method": "POST",
       "path": "/api/credits/1/deduct",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:22:27.411Z",
+      "at": "2026-10-25T17:32:39.341Z",
       "method": "PATCH",
       "path": "/api/credits/1/reset",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:22:28.777Z",
+      "at": "2026-10-25T17:32:41.077Z",
       "method": "GET",
       "path": "/api/credits/999999",
       "status": 404
     },
     {
-      "at": "2026-10-25T17:22:29.075Z",
+      "at": "2026-10-25T17:32:41.373Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:22:29.194Z",
+      "at": "2026-10-25T17:32:41.491Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 401
     },
     {
-      "at": "2026-10-25T17:22:29.410Z",
+      "at": "2026-10-25T17:32:41.708Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:22:29.893Z",
+      "at": "2026-10-25T17:32:42.189Z",
       "method": "POST",
       "path": "/api/schema/apply",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:22:29.897Z",
+      "at": "2026-10-25T17:32:42.194Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:22:30.277Z",
+      "at": "2026-10-25T17:32:42.574Z",
       "method": "POST",
       "path": "/api/schema/apply",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:22:30.281Z",
+      "at": "2026-10-25T17:32:42.580Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 200
@@ -133,11 +133,41 @@
   ],
   "directBackendChecks": [
     {
+      "name": "Concurrent additions",
+      "status": 200,
+      "expected": 200,
+      "actual": 200
+    },
+    {
       "name": "POST add with amount=0",
       "status": 422,
       "expected": 422,
       "actual": 422,
       "detail": "{\"detail\":[{\"type\":\"greater_than\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Input should be greater than 0\",\"input\":0,\"ctx\":{\"gt\":0}}]}"
+    },
+    {
+      "name": "Invalid add amount -1",
+      "status": 422,
+      "expected": 422,
+      "actual": 422
+    },
+    {
+      "name": "Invalid add amount 1.5",
+      "status": 422,
+      "expected": 422,
+      "actual": 422
+    },
+    {
+      "name": "Invalid add amount 2147483648",
+      "status": 422,
+      "expected": 422,
+      "actual": 422
+    },
+    {
+      "name": "Credit balance overflow",
+      "status": 400,
+      "expected": 400,
+      "actual": 400
     },
     {
       "name": "POST deduct above available balance",
@@ -285,7 +315,42 @@
       "actual": "0"
     },
     {
+      "check": "Concurrent additions both commit without lost updates",
+      "status": "passed",
+      "query": "SELECT credits FROM credits WHERE user_id = 1",
+      "expected": "50",
+      "actual": "50"
+    },
+    {
+      "check": "Concurrent-write test resets only the isolated test account",
+      "status": "passed",
+      "query": "SELECT credits FROM credits WHERE user_id = 1",
+      "expected": "0",
+      "actual": "0"
+    },
+    {
       "check": "Invalid amount did not alter balance",
+      "status": "passed",
+      "query": "SELECT credits FROM credits WHERE user_id = 1",
+      "expected": "0",
+      "actual": "0"
+    },
+    {
+      "check": "Invalid amounts did not alter the balance",
+      "status": "passed",
+      "query": "SELECT credits FROM credits WHERE user_id = 1",
+      "expected": "0",
+      "actual": "0"
+    },
+    {
+      "check": "Overflow guard leaves the maximum valid balance unchanged",
+      "status": "passed",
+      "query": "SELECT credits FROM credits WHERE user_id = 1",
+      "expected": "2147483647",
+      "actual": "2147483647"
+    },
+    {
+      "check": "Overflow test restores the isolated account to zero",
       "status": "passed",
       "query": "SELECT credits FROM credits WHERE user_id = 1",
       "expected": "0",
@@ -374,9 +439,24 @@
       "evidence": "PATCH /api/credits/1/reset = 200; UI and direct SQL both report 0"
     },
     {
+      "name": "Concurrent credit additions are atomic",
+      "status": "passed",
+      "evidence": "Two concurrent +25 requests persist a final balance of 50; cleanup reset returns the test account to zero"
+    },
+    {
       "name": "Backend rejects a zero-amount add without changing the database",
       "status": "passed",
       "evidence": "POST amount=0 = 422; balance remains 0"
+    },
+    {
+      "name": "Negative, fractional, and out-of-range amounts are rejected",
+      "status": "passed",
+      "evidence": "Negative, fractional, and greater-than-PostgreSQL-integer amounts return 422; the stored balance remains zero"
+    },
+    {
+      "name": "Adding credits cannot overflow the PostgreSQL integer balance",
+      "status": "passed",
+      "evidence": "An addition at the maximum stored integer is rejected with 400 instead of overflowing PostgreSQL"
     },
     {
       "name": "Backend rejects over-deduction even on direct API calls",
@@ -409,9 +489,9 @@
       "evidence": "Incorrect credentials return 401; duplicate email cannot create a second account"
     },
     {
-      "name": "Repeated failed sign-ins trigger a database-backed cooldown",
+      "name": "Repeated failed sign-ins are throttled",
       "status": "passed",
-      "evidence": "Ten invalid attempts trigger a 15-minute cooldown persisted in PostgreSQL"
+      "evidence": "Ten invalid attempts trigger a 15-minute cooldown; the identifier is stored only as a one-way fingerprint"
     },
     {
       "name": "Missing user shows the real backend 404 in the frontend",
@@ -442,6 +522,11 @@
       "name": "Repeated migration name is idempotently skipped",
       "status": "passed",
       "evidence": "Second request was skipped; exactly one migration row remains"
+    },
+    {
+      "name": "Concurrent duplicate migrations produce one atomic result",
+      "status": "passed",
+      "evidence": "Concurrent requests apply DDL once and record exactly one migration row"
     },
     {
       "name": "Production-built dashboard and navigation work at mobile width",
