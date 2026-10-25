@@ -452,6 +452,16 @@ async function run() {
     return "A different existing user's account is concealed with HTTP 404";
   });
 
+  await verify("The credit-operator key grants explicit cross-account operator access", async () => {
+    const response = await fetch(apiBaseUrl + "/api/credits/2", {
+      headers: { Authorization: "Bearer " + testToken, "X-API-Key": creditAdminKey, Accept: "application/json" }
+    });
+    assert.equal(response.status, 200);
+    const account = await response.json();
+    assert.equal(account.user_id, 2);
+    directApiChecks.push({ name: "Cross-account credit read with operator key", status: response.status, expected: 200, actual: response.status });
+    return "The separate credit-operator key permits an explicit cross-account read";
+  });
   await verify("Invalid passwords and duplicate registrations are rejected", async () => {
     const badLogin = await fetch(apiBaseUrl + "/api/auth/login", {
       method: "POST",
