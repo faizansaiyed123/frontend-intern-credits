@@ -1,131 +1,131 @@
 {
-  "runStartedAt": "2026-10-25T17:39:10.269Z",
+  "runStartedAt": "2026-10-25T17:41:07.688Z",
   "overallStatus": "PASSED",
   "apiOrigin": "http://127.0.0.1:8000",
   "note": "No API routes were mocked or intercepted. API keys and request headers are deliberately excluded.",
   "browserRequests": [
     {
-      "at": "2026-10-25T17:39:18.618Z",
+      "at": "2026-10-25T17:41:16.406Z",
       "method": "POST",
       "path": "/api/auth/register",
       "status": 201
     },
     {
-      "at": "2026-10-25T17:39:18.669Z",
+      "at": "2026-10-25T17:41:16.461Z",
       "method": "GET",
       "path": "/healthz",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:39:18.670Z",
+      "at": "2026-10-25T17:41:16.463Z",
       "method": "GET",
       "path": "/api/auth/me",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:39:18.679Z",
+      "at": "2026-10-25T17:41:16.471Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:39:18.938Z",
+      "at": "2026-10-25T17:41:16.666Z",
       "method": "GET",
       "path": "/healthz",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:39:18.960Z",
+      "at": "2026-10-25T17:41:16.667Z",
       "method": "GET",
       "path": "/api/auth/me",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:39:18.966Z",
+      "at": "2026-10-25T17:41:16.680Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:39:20.092Z",
+      "at": "2026-10-25T17:41:17.615Z",
       "method": "POST",
       "path": "/api/credits/1/add",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:39:20.455Z",
+      "at": "2026-10-25T17:41:17.881Z",
       "method": "GET",
       "path": "/healthz",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:39:20.469Z",
+      "at": "2026-10-25T17:41:17.882Z",
       "method": "GET",
       "path": "/api/auth/me",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:39:20.483Z",
+      "at": "2026-10-25T17:41:17.895Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:39:21.470Z",
+      "at": "2026-10-25T17:41:18.710Z",
       "method": "POST",
       "path": "/api/credits/1/deduct",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:39:22.527Z",
+      "at": "2026-10-25T17:41:19.473Z",
       "method": "PATCH",
       "path": "/api/credits/1/reset",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:39:24.408Z",
+      "at": "2026-10-25T17:41:20.770Z",
       "method": "GET",
       "path": "/api/credits/999999",
       "status": 404
     },
     {
-      "at": "2026-10-25T17:39:24.711Z",
+      "at": "2026-10-25T17:41:20.994Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:39:24.827Z",
+      "at": "2026-10-25T17:41:21.086Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 401
     },
     {
-      "at": "2026-10-25T17:39:25.043Z",
+      "at": "2026-10-25T17:41:21.254Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:39:25.526Z",
+      "at": "2026-10-25T17:41:21.672Z",
       "method": "POST",
       "path": "/api/schema/apply",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:39:25.531Z",
+      "at": "2026-10-25T17:41:21.674Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:39:25.893Z",
+      "at": "2026-10-25T17:41:21.955Z",
       "method": "POST",
       "path": "/api/schema/apply",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:39:25.898Z",
+      "at": "2026-10-25T17:41:21.957Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 200
@@ -277,6 +277,12 @@
       "status": 400,
       "expected": 400,
       "actual": 400
+    },
+    {
+      "name": "Schema DDL failure",
+      "status": 500,
+      "expected": 500,
+      "actual": 500
     },
     {
       "name": "Session logout",
@@ -533,6 +539,11 @@
       "name": "Repeated migration name is idempotently skipped",
       "status": "passed",
       "evidence": "Second request was skipped; exactly one migration row remains"
+    },
+    {
+      "name": "Failed schema DDL rolls back its migration record",
+      "status": "passed",
+      "evidence": "A database DDL error returns 500, rolls back the claimed migration row, and leaves the original index intact"
     },
     {
       "name": "Concurrent duplicate migrations produce one atomic result",

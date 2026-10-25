@@ -1,7 +1,7 @@
 # Mintline integrated E2E verification report
 
 - Overall status: PASSED
-- Started at UTC: 2026-10-25T17:39:10.269Z
+- Started at UTC: 2026-10-25T17:41:07.688Z
 - Frontend: production Vite build served at http://127.0.0.1:4173
 - Backend: FastAPI main checkout at http://127.0.0.1:8000
 - Database: ephemeral PostgreSQL; direct verification via psql
@@ -38,6 +38,7 @@
 | PASSED | Browser migration submission creates an index and audit record | POST /api/schema/apply = 200; SQL confirms the index and exactly one migration record |
 | PASSED | Migration API rejects destructive and multi-statement SQL | Destructive, multi-statement, table-copy, rename, and unapproved-column submissions are rejected |
 | PASSED | Repeated migration name is idempotently skipped | Second request was skipped; exactly one migration row remains |
+| PASSED | Failed schema DDL rolls back its migration record | A database DDL error returns 500, rolls back the claimed migration row, and leaves the original index intact |
 | PASSED | Concurrent duplicate migrations produce one atomic result | Concurrent requests apply DDL once and record exactly one migration row |
 | PASSED | Production-built dashboard and navigation work at mobile width | 390×844 viewport rendered; account was loaded through GET /api/credits/1 |
 | PASSED | Logout revokes the active database session | Logout revokes the server-side session; reuse of the old token returns 401 |
@@ -97,6 +98,7 @@
 | CREATE TABLE AS SELECT | 400 | 400 | 400 |
 | ALTER TABLE rename | 400 | 400 | 400 |
 | Index on non-allowlisted column | 400 | 400 | 400 |
+| Schema DDL failure | 500 | 500 | 500 |
 | Session logout | 200 | 200 | 200 |
 | Revoked session reuse | 401 | 401 | 401 |
 
