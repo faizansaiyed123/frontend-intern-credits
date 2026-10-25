@@ -1,131 +1,131 @@
 {
-  "runStartedAt": "2026-10-25T17:32:33.113Z",
+  "runStartedAt": "2026-10-25T17:39:10.269Z",
   "overallStatus": "PASSED",
   "apiOrigin": "http://127.0.0.1:8000",
   "note": "No API routes were mocked or intercepted. API keys and request headers are deliberately excluded.",
   "browserRequests": [
     {
-      "at": "2026-10-25T17:32:35.540Z",
+      "at": "2026-10-25T17:39:18.618Z",
       "method": "POST",
       "path": "/api/auth/register",
       "status": 201
     },
     {
-      "at": "2026-10-25T17:32:35.577Z",
+      "at": "2026-10-25T17:39:18.669Z",
       "method": "GET",
       "path": "/healthz",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:32:35.579Z",
+      "at": "2026-10-25T17:39:18.670Z",
       "method": "GET",
       "path": "/api/auth/me",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:32:35.595Z",
+      "at": "2026-10-25T17:39:18.679Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:32:35.832Z",
+      "at": "2026-10-25T17:39:18.938Z",
       "method": "GET",
       "path": "/healthz",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:32:35.839Z",
+      "at": "2026-10-25T17:39:18.960Z",
       "method": "GET",
       "path": "/api/auth/me",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:32:35.848Z",
+      "at": "2026-10-25T17:39:18.966Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:32:36.940Z",
+      "at": "2026-10-25T17:39:20.092Z",
       "method": "POST",
       "path": "/api/credits/1/add",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:32:37.304Z",
+      "at": "2026-10-25T17:39:20.455Z",
       "method": "GET",
       "path": "/healthz",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:32:37.315Z",
+      "at": "2026-10-25T17:39:20.469Z",
       "method": "GET",
       "path": "/api/auth/me",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:32:37.327Z",
+      "at": "2026-10-25T17:39:20.483Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:32:38.325Z",
+      "at": "2026-10-25T17:39:21.470Z",
       "method": "POST",
       "path": "/api/credits/1/deduct",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:32:39.341Z",
+      "at": "2026-10-25T17:39:22.527Z",
       "method": "PATCH",
       "path": "/api/credits/1/reset",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:32:41.077Z",
+      "at": "2026-10-25T17:39:24.408Z",
       "method": "GET",
       "path": "/api/credits/999999",
       "status": 404
     },
     {
-      "at": "2026-10-25T17:32:41.373Z",
+      "at": "2026-10-25T17:39:24.711Z",
       "method": "GET",
       "path": "/api/credits/1",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:32:41.491Z",
+      "at": "2026-10-25T17:39:24.827Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 401
     },
     {
-      "at": "2026-10-25T17:32:41.708Z",
+      "at": "2026-10-25T17:39:25.043Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:32:42.189Z",
+      "at": "2026-10-25T17:39:25.526Z",
       "method": "POST",
       "path": "/api/schema/apply",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:32:42.194Z",
+      "at": "2026-10-25T17:39:25.531Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:32:42.574Z",
+      "at": "2026-10-25T17:39:25.893Z",
       "method": "POST",
       "path": "/api/schema/apply",
       "status": 200
     },
     {
-      "at": "2026-10-25T17:32:42.580Z",
+      "at": "2026-10-25T17:39:25.898Z",
       "method": "GET",
       "path": "/api/schema/migrations",
       "status": 200
@@ -232,6 +232,12 @@
     },
     {
       "name": "Sign-in rate limit",
+      "status": 429,
+      "expected": 429,
+      "actual": 429
+    },
+    {
+      "name": "Registration rate limit",
       "status": 429,
       "expected": 429,
       "actual": 429
@@ -492,6 +498,11 @@
       "name": "Repeated failed sign-ins are throttled",
       "status": "passed",
       "evidence": "Ten invalid attempts trigger a 15-minute cooldown; the identifier is stored only as a one-way fingerprint"
+    },
+    {
+      "name": "Repeated invalid registrations trigger a client-scoped cooldown",
+      "status": "passed",
+      "evidence": "Ten invalid sign-up attempts return 422; the next is rate-limited with HTTP 429 for 15 minutes, with no account created"
     },
     {
       "name": "Missing user shows the real backend 404 in the frontend",

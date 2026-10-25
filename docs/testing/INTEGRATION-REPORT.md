@@ -1,7 +1,7 @@
 # Mintline integrated E2E verification report
 
 - Overall status: PASSED
-- Started at UTC: 2026-10-25T17:32:33.113Z
+- Started at UTC: 2026-10-25T17:39:10.269Z
 - Frontend: production Vite build served at http://127.0.0.1:4173
 - Backend: FastAPI main checkout at http://127.0.0.1:8000
 - Database: ephemeral PostgreSQL; direct verification via psql
@@ -31,6 +31,7 @@
 | PASSED | The credit-operator key grants explicit cross-account operator access | The separate credit-operator key permits an explicit cross-account read |
 | PASSED | Invalid passwords and duplicate registrations are rejected | Incorrect credentials return 401; duplicate email cannot create a second account |
 | PASSED | Repeated failed sign-ins are throttled | Ten invalid attempts trigger a 15-minute cooldown; the identifier is stored only as a one-way fingerprint |
+| PASSED | Repeated invalid registrations trigger a client-scoped cooldown | Ten invalid sign-up attempts return 422; the next is rate-limited with HTTP 429 for 15 minutes, with no account created |
 | PASSED | Missing user shows the real backend 404 in the frontend | GET /api/credits/999999 = 404; visible account-not-found message |
 | PASSED | Admin screen displays the real 401 from an incorrect API key | GET /api/schema/migrations with bad key = 401 |
 | PASSED | Correct admin key loads migration history from PostgreSQL | GET /api/schema/migrations with correct key = 200 |
@@ -89,6 +90,7 @@
 | Incorrect password | 401 | 401 | 401 |
 | Duplicate account registration | 409 | 409 | 409 |
 | Sign-in rate limit | 429 | 429 | 429 |
+| Registration rate limit | 429 | 429 | 429 |
 | Schema migration list with credit-only key | 401 | 401 | 401 |
 | Destructive migration SQL | 400 | 400 | 400 |
 | Multi-statement migration SQL | 400 | 400 | 400 |
