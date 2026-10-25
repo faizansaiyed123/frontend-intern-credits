@@ -336,9 +336,11 @@ async function run() {
   await verify("Reloading re-reads the persisted account balance", async () => {
     await page.reload({ waitUntil: "networkidle" });
     await waitForBalance(page, 145);
+    // Operator keys intentionally stay only in component memory and must be re-entered after a reload.
+    await page.locator("#credit-admin-key").fill(creditAdminKey);
     expectApi("GET", "/api/credits/1", 200);
     await assertDatabaseBalance(145, "Read-after-write persistence after reload");
-    return "Browser reload reads 145 through the backend";
+    return "Browser reload reads 145 through the backend; privileged key is not persisted";
   });
 
   await verify("Deducting 40 credits updates the UI and the actual database row", async () => {
