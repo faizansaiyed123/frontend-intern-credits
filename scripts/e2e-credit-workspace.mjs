@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { execFileSync, spawnSync } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -15,6 +16,7 @@ const adminKey = process.env.ADMIN_API_KEY;
 const psqlUrl = process.env.PSQL_URL;
 const startedAt = new Date().toISOString();
 const checks = [];
+let testToken = "";
 const apiRequests = [];
 const directApiChecks = [];
 const dbChecks = [];
@@ -270,10 +272,10 @@ async function run() {
     } catch {}
   });
 
-  await verify("PostgreSQL contains a queryable seeded test account", async () => {
-    assert.equal(sqlValue("SELECT count(*) FROM users WHERE user_id=1 AND email='e2e-mintline@example.invalid';"), "1");
-    assert.equal(sqlValue("SELECT credits FROM credits WHERE user_id=1;"), "120");
-    return "user_id 1 starts at 120 credits in PostgreSQL";
+  await verify("PostgreSQL schema contains authentication fields and revocable sessions", async () => {
+    assert.equal(sqlValue("SELECT count(*) FROM information_schema.columns WHERE table_name='users' AND column_name='password_hash';"), "1");
+    assert.equal(sqlValue("SELECT count(*) FROM information_schema.tables WHERE table_name='auth_sessions';"), "1");
+    return "password hash column and auth_sessions table exist";
   });
 
   await verify("Public homepage renders", async () => {
@@ -285,12 +287,32 @@ async function run() {
   await verify("Opening the dashboard calls live health and account endpoints", async () => {
     await page.getByRole("button", { name: /Open credit dashboard/i }).click();
     await page.waitForURL("**/dashboard");
+    await page.getByRole("tab", { name: "Create account" }).click();
+    await page.getByLabel("Full name").fill("Mintline E2E Test User");
+    await page.getByLabel("Email address").fill("e2e-mintline@example.invalid");
+    await page.getByLabel("Password").fill("Mintline-Test-Password-2026!");
+    await page.getByLabel("Confirm password").fill("Mintline-Test-Password-2026!");
+    await page.locator(".auth-form").getByRole("button", { name: /Create account/i }).click();
+    await page.waitForFunction(() => {
+      const balance = document.querySelector(".balance-number");
+      return Boolean(balance && (balance.textContent || "").replace(/,/g, "").trim() === "0");
+    }, null, { timeout: 15000 });
+    assert.equal(sqlValue("SELECT count(*) FROM users WHERE user_id=1 AND email='e2e-mintline@example.invalid' AND password_hash IS NOT NULL;"), "1");
+    assert.equal(sqlValue("SELECT credits FROM credits WHERE user_id=1;"), "0");
+    testToken = await page.evaluate(() => window.sessionStorage.getItem("mintline_access_token") || "");
+    assert.ok(testToken.length >= 40, "Registration did not store an opaque session token.");
+    const storedHash = sqlValue("SELECT token_hash FROM auth_sessions WHERE user_id=1 ORDER BY session_id DESC LIMIT 1;");
+    assert.equal(storedHash, createHash("sha256").update(testToken).digest("hex"), "Database should store only the SHA-256 token hash.");
+    sqlValue("UPDATE credits SET credits=120, last_updated=NOW() WHERE user_id=1;");
+    await page.reload({ waitUntil: "networkidle" });
     await waitForBalance(page, 120);
     await page.getByText("API connected", { exact: true }).first().waitFor({ state: "visible" });
     expectApi("GET", "/healthz", 200);
+    expectApi("POST", "/api/auth/register", 201);
+    expectApi("GET", "/api/auth/me", 200);
     expectApi("GET", "/api/credits/1", 200);
     await takeScreenshot(page, "02-dashboard-initial-balance.png");
-    return "GET /healthz = 200; GET /api/credits/1 = 200; UI balance = 120";
+    return "Account registered; hashed session persisted; authenticated balance read = 120";
   });
 
   await verify("Adding 25 credits updates the UI and the actual database row", async () => {
@@ -349,7 +371,7 @@ async function run() {
   await verify("Backend rejects a zero-amount add without changing the database", async () => {
     const response = await fetch(apiBaseUrl + "/api/credits/1/add", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      headers: { "Content-Type": "application/json", Accept: "application/json", Authorization: "Bearer " + testToken },
       body: JSON.stringify({ amount: 0 })
     });
     const body = await response.text();
@@ -362,7 +384,7 @@ async function run() {
   await verify("Backend rejects over-deduction even on direct API calls", async () => {
     const response = await fetch(apiBaseUrl + "/api/credits/1/deduct", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      headers: { "Content-Type": "application/json", Accept: "application/json", Authorization: "Bearer " + testToken },
       body: JSON.stringify({ amount: 1 })
     });
     const body = await response.text();
@@ -371,6 +393,50 @@ async function run() {
     assert.ok(body.includes("Insufficient credits"));
     await assertDatabaseBalance(0, "Over-deduction did not alter balance");
     return "POST deduct from zero = 400 Insufficient credits; balance remains 0";
+  });
+
+  await verify("Credit endpoints reject unauthenticated reads and writes", async () => {
+    const read = await fetch(apiBaseUrl + "/api/credits/1");
+    assert.equal(read.status, 401);
+    const write = await fetch(apiBaseUrl + "/api/credits/1/add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ amount: 1 })
+    });
+    assert.equal(write.status, 401);
+    await assertDatabaseBalance(0, "Unauthenticated write did not alter the balance");
+    directApiChecks.push({ name: "Unauthenticated credit read", status: read.status, expected: 401, actual: read.status });
+    directApiChecks.push({ name: "Unauthenticated credit write", status: write.status, expected: 401, actual: write.status });
+    return "Read and write attempts without a bearer session return 401; balance is unchanged";
+  });
+
+  await verify("An authenticated account cannot access another user's balance", async () => {
+    sqlValue("INSERT INTO users (user_id, email, name) VALUES (2, 'other-e2e@example.invalid', 'Other User') ON CONFLICT (user_id) DO NOTHING;");
+    const response = await fetch(apiBaseUrl + "/api/credits/2", {
+      headers: { Authorization: "Bearer " + testToken, Accept: "application/json" }
+    });
+    assert.equal(response.status, 404);
+    directApiChecks.push({ name: "Cross-account credit read", status: response.status, expected: 404, actual: response.status });
+    return "A different existing user's account is concealed with HTTP 404";
+  });
+
+  await verify("Invalid passwords and duplicate registrations are rejected", async () => {
+    const badLogin = await fetch(apiBaseUrl + "/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: "e2e-mintline@example.invalid", password: "wrong-password" })
+    });
+    assert.equal(badLogin.status, 401);
+    const duplicate = await fetch(apiBaseUrl + "/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: "e2e-mintline@example.invalid", name: "Duplicate", password: "Mintline-Test-Password-2026!" })
+    });
+    assert.equal(duplicate.status, 409);
+    directApiChecks.push({ name: "Incorrect password", status: badLogin.status, expected: 401, actual: badLogin.status });
+    directApiChecks.push({ name: "Duplicate account registration", status: duplicate.status, expected: 409, actual: duplicate.status });
+    assert.equal(sqlValue("SELECT count(*) FROM users WHERE email='e2e-mintline@example.invalid';"), "1");
+    return "Incorrect credentials return 401; duplicate email cannot create a second account";
   });
 
   await verify("Missing user shows the real backend 404 in the frontend", async () => {
@@ -421,6 +487,25 @@ async function run() {
     return "POST /api/schema/apply = 200; SQL confirms the index and exactly one migration record";
   });
 
+  await verify("Migration API rejects destructive and multi-statement SQL", async () => {
+    const destructive = await fetch(apiBaseUrl + "/api/schema/apply", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-API-Key": adminKey },
+      body: JSON.stringify({ migration_name: "e2e_rejected_destructive", sql: "DROP TABLE credits;" })
+    });
+    assert.equal(destructive.status, 400);
+    const multi = await fetch(apiBaseUrl + "/api/schema/apply", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-API-Key": adminKey },
+      body: JSON.stringify({ migration_name: "e2e_rejected_multi", sql: "CREATE INDEX idx_e2e_multi ON credits(user_id); DROP TABLE credits;" })
+    });
+    assert.equal(multi.status, 400);
+    assert.equal(sqlValue("SELECT (to_regclass('public.credits') IS NOT NULL)::text;"), "true");
+    directApiChecks.push({ name: "Destructive migration SQL", status: destructive.status, expected: 400, actual: destructive.status });
+    directApiChecks.push({ name: "Multi-statement migration SQL", status: multi.status, expected: 400, actual: multi.status });
+    return "DROP TABLE and multi-statement submissions are rejected; credits table remains";
+  });
+
   await verify("Repeated migration name is idempotently skipped", async () => {
     await page.getByLabel("Migration name").fill("e2e_verified_credits_index");
     await page.getByLabel("SQL statement").fill("CREATE INDEX IF NOT EXISTS idx_e2e_credits_last_updated ON credits(last_updated DESC);");
@@ -443,6 +528,21 @@ async function run() {
     assert.ok(apiRequests.some((item) => item.method === "GET" && item.path === "/api/credits/1" && item.status === 200));
     await mobile.close();
     return "390×844 viewport rendered; account was loaded through GET /api/credits/1";
+  });
+
+  await verify("Logout revokes the active database session", async () => {
+    const logout = await fetch(apiBaseUrl + "/api/auth/logout", {
+      method: "POST",
+      headers: { Authorization: "Bearer " + testToken }
+    });
+    assert.equal(logout.status, 200);
+    const stale = await fetch(apiBaseUrl + "/api/auth/me", {
+      headers: { Authorization: "Bearer " + testToken }
+    });
+    assert.equal(stale.status, 401);
+    directApiChecks.push({ name: "Session logout", status: logout.status, expected: 200, actual: logout.status });
+    directApiChecks.push({ name: "Revoked session reuse", status: stale.status, expected: 401, actual: stale.status });
+    return "Logout revokes the server-side session; reuse of the old token returns 401";
   });
 
   await verify("Daily scheduler logic updates the isolated database", async () => {
@@ -470,6 +570,8 @@ async function run() {
       ["POST", "/api/credits/1/deduct", 200],
       ["PATCH", "/api/credits/1/reset", 200],
       ["GET", "/api/credits/999999", 404],
+      ["POST", "/api/auth/register", 201],
+      ["GET", "/api/auth/me", 200],
       ["GET", "/api/schema/migrations", 401],
       ["GET", "/api/schema/migrations", 200],
       ["POST", "/api/schema/apply", 200]
