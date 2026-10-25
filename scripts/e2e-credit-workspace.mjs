@@ -428,10 +428,17 @@ async function run() {
       body: JSON.stringify({ amount: 1 })
     });
     assert.equal(incorrect.status, 401);
-    await assertDatabaseBalance(0, "Missing or incorrect admin key did not alter the balance");
-    directApiChecks.push({ name: "Credit mutation without admin key", status: missing.status, expected: 401, actual: missing.status });
-    directApiChecks.push({ name: "Credit mutation with incorrect admin key", status: incorrect.status, expected: 401, actual: incorrect.status });
-    return "A valid session alone and a wrong administrator key cannot modify credit balances";
+    const schemaKey = await fetch(apiBaseUrl + "/api/credits/1/add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + testToken, "X-API-Key": adminKey },
+      body: JSON.stringify({ amount: 1 })
+    });
+    assert.equal(schemaKey.status, 401);
+    await assertDatabaseBalance(0, "Missing, incorrect, or schema-only key did not alter the balance");
+    directApiChecks.push({ name: "Credit mutation without operator key", status: missing.status, expected: 401, actual: missing.status });
+    directApiChecks.push({ name: "Credit mutation with incorrect key", status: incorrect.status, expected: 401, actual: incorrect.status });
+    directApiChecks.push({ name: "Credit mutation with schema-only key", status: schemaKey.status, expected: 401, actual: schemaKey.status });
+    return "A valid session alone, incorrect key, and schema-only key cannot modify credit balances";
   });
 
   await verify("An authenticated account cannot access another user's balance", async () => {
@@ -482,6 +489,11 @@ async function run() {
     await page.getByRole("button", { name: /Load migration history/i }).click();
     await page.locator(".inline-error").filter({ hasText: "Unauthorized" }).first().waitFor({ state: "visible" });
     expectApi("GET", "/api/schema/migrations", 401);
+    const creditKeyCannotReadSchema = await fetch(apiBaseUrl + "/api/schema/migrations", {
+      headers: { "X-API-Key": creditAdminKey, Accept: "application/json" }
+    });
+    assert.equal(creditKeyCannotReadSchema.status, 401);
+    directApiChecks.push({ name: "Schema migration list with credit-only key", status: creditKeyCannotReadSchema.status, expected: 401, actual: creditKeyCannotReadSchema.status });
     await takeScreenshot(page, "10-admin-unauthorized.png");
     return "GET /api/schema/migrations with bad key = 401";
   });
