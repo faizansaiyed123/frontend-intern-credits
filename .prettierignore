@@ -2,3 +2,6 @@ node_modules/
 dist/
 docs/testing/
 docs/walkthrough/
+README.md
+visual.md
+.github/workflows/
