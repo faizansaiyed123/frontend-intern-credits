@@ -26,5 +26,8 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Check code formatting
+        run: npm run format:check
+
       - name: Verify TypeScript and build
         run: npm run build

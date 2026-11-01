@@ -20,13 +20,12 @@ export interface MigrationList {
 }
 
 export interface ApplyMigrationResult {
-  status: "applied" | "skipped";
+  status: 'applied' | 'skipped';
   reason?: string;
   migration_name: string;
 }
 
-export type CreditOperation = "add" | "deduct" | "reset";
-
+export type CreditOperation = 'add' | 'deduct' | 'reset';
 
 export interface AuthUser {
   user_id: number;
@@ -36,7 +35,7 @@ export interface AuthUser {
 
 export interface AuthResponse {
   access_token: string;
-  token_type: "bearer";
+  token_type: 'bearer';
   expires_at: string;
   user: AuthUser;
 }

@@ -5,16 +5,18 @@ import type {
   AuthUser,
   CreditAccount,
   MigrationList,
-} from "./types";
+} from './types';
 
 export const API_BASE_URL = (
-  import.meta.env.VITE_API_BASE_URL?.trim() || "http://localhost:8000"
-).replace(/\/+$/, "");
+  import.meta.env.VITE_API_BASE_URL?.trim() || 'http://localhost:8000'
+).replace(/\/+$/, '');
 
-const SESSION_KEY = "mintline_access_token";
+const SESSION_KEY = 'mintline_access_token';
 
 export function getAccessToken(): string {
-  return typeof window === "undefined" ? "" : window.sessionStorage.getItem(SESSION_KEY) || "";
+  return typeof window === 'undefined'
+    ? ''
+    : window.sessionStorage.getItem(SESSION_KEY) || '';
 }
 
 export function setAccessToken(token: string): void {
@@ -30,7 +32,7 @@ export class ApiError extends Error {
 
   constructor(message: string, status?: number) {
     super(message);
-    this.name = "ApiError";
+    this.name = 'ApiError';
     this.status = status;
   }
 }
@@ -39,9 +41,9 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   let response: Response;
   const token = getAccessToken();
   const headers = new Headers(init.headers);
-  headers.set("Accept", "application/json");
-  if (token && !headers.has("Authorization")) {
-    headers.set("Authorization", `Bearer ${token}`);
+  headers.set('Accept', 'application/json');
+  if (token && !headers.has('Authorization')) {
+    headers.set('Authorization', `Bearer ${token}`);
   }
 
   try {
@@ -68,11 +70,11 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 
   if (!response.ok) {
     let message = `Request failed (${response.status})`;
-    if (typeof payload === "string" && payload.trim()) {
+    if (typeof payload === 'string' && payload.trim()) {
       message = payload;
-    } else if (payload && typeof payload === "object" && "detail" in payload) {
+    } else if (payload && typeof payload === 'object' && 'detail' in payload) {
       const detail = (payload as { detail?: unknown }).detail;
-      if (typeof detail === "string") message = detail;
+      if (typeof detail === 'string') message = detail;
       else if (detail !== undefined) message = JSON.stringify(detail);
     }
     throw new ApiError(message, response.status);
@@ -81,70 +83,91 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   return payload as T;
 }
 
-export function registerAccount(input: { name: string; email: string; password: string }): Promise<AuthResponse> {
-  return request<AuthResponse>("/api/auth/register", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+export function registerAccount(input: {
+  name: string;
+  email: string;
+  password: string;
+}): Promise<AuthResponse> {
+  return request<AuthResponse>('/api/auth/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
   });
 }
 
-export function loginAccount(input: { email: string; password: string }): Promise<AuthResponse> {
-  return request<AuthResponse>("/api/auth/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+export function loginAccount(input: {
+  email: string;
+  password: string;
+}): Promise<AuthResponse> {
+  return request<AuthResponse>('/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
   });
 }
 
 export function getCurrentUser(): Promise<AuthUser> {
-  return request<AuthUser>("/api/auth/me");
+  return request<AuthUser>('/api/auth/me');
 }
 
 export async function logoutAccount(): Promise<void> {
   try {
-    await request<{ ok: boolean }>("/api/auth/logout", { method: "POST" });
+    await request<{ ok: boolean }>('/api/auth/logout', { method: 'POST' });
   } finally {
     clearAccessToken();
   }
 }
 
 export function getApiHealth(): Promise<ApiHealth> {
-  return request<ApiHealth>("/healthz");
+  return request<ApiHealth>('/healthz');
 }
 
-export function getCredits(userId: number, adminKey = ""): Promise<CreditAccount> {
+export function getCredits(
+  userId: number,
+  adminKey = '',
+): Promise<CreditAccount> {
   return request<CreditAccount>(`/api/credits/${userId}`, {
-    headers: adminKey ? { "X-API-Key": adminKey } : undefined,
+    headers: adminKey ? { 'X-API-Key': adminKey } : undefined,
   });
 }
 
-export function addCredits(userId: number, amount: number, adminKey: string): Promise<CreditAccount> {
+export function addCredits(
+  userId: number,
+  amount: number,
+  adminKey: string,
+): Promise<CreditAccount> {
   return request<CreditAccount>(`/api/credits/${userId}/add`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-API-Key": adminKey },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-API-Key': adminKey },
     body: JSON.stringify({ amount }),
   });
 }
 
-export function deductCredits(userId: number, amount: number, adminKey: string): Promise<CreditAccount> {
+export function deductCredits(
+  userId: number,
+  amount: number,
+  adminKey: string,
+): Promise<CreditAccount> {
   return request<CreditAccount>(`/api/credits/${userId}/deduct`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-API-Key": adminKey },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-API-Key': adminKey },
     body: JSON.stringify({ amount }),
   });
 }
 
-export function resetCredits(userId: number, adminKey: string): Promise<CreditAccount> {
+export function resetCredits(
+  userId: number,
+  adminKey: string,
+): Promise<CreditAccount> {
   return request<CreditAccount>(`/api/credits/${userId}/reset`, {
-    method: "PATCH",
-    headers: { "X-API-Key": adminKey },
+    method: 'PATCH',
+    headers: { 'X-API-Key': adminKey },
   });
 }
 
 export function listMigrations(apiKey: string): Promise<MigrationList> {
-  return request<MigrationList>("/api/schema/migrations", {
-    headers: { "X-API-Key": apiKey },
+  return request<MigrationList>('/api/schema/migrations', {
+    headers: { 'X-API-Key': apiKey },
   });
 }
 
@@ -153,11 +176,11 @@ export function applyMigration(
   migrationName: string,
   sql: string,
 ): Promise<ApplyMigrationResult> {
-  return request<ApplyMigrationResult>("/api/schema/apply", {
-    method: "POST",
+  return request<ApplyMigrationResult>('/api/schema/apply', {
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
-      "X-API-Key": apiKey,
+      'Content-Type': 'application/json',
+      'X-API-Key': apiKey,
     },
     body: JSON.stringify({ migration_name: migrationName, sql }),
   });
