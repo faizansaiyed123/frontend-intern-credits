@@ -13,9 +13,13 @@ const DEMO_API_URL = import.meta.env.VITE_DEMO_API_URL?.trim() || '';
 export const IS_LOCAL_DEMO_MODE = DEMO_MODE_ENABLED && !DEMO_API_URL;
 export const DEMO_CREDENTIALS = browserDemo.DEMO_CREDENTIALS;
 
+const API_ORIGIN = DEMO_MODE_ENABLED && DEMO_API_URL
+  ? DEMO_API_URL
+  : import.meta.env.VITE_API_BASE_URL?.trim() || 'http://localhost:8000';
+
 export const API_BASE_URL = IS_LOCAL_DEMO_MODE
   ? 'Browser-only demo'
-  : (DEMO_API_URL || import.meta.env.VITE_API_BASE_URL?.trim() || 'http://localhost:8000').replace(/\/+$/, '');
+  : API_ORIGIN.replace(/\/+$/, '');
 
 const SESSION_KEY = 'mintline_access_token';
 
