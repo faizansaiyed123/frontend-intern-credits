@@ -336,3 +336,69 @@
     padding: 18px;
   }
 }
+
+
+.demo-access-card {
+  display: grid;
+  gap: 11px;
+  margin: 18px 0 20px;
+  padding: 15px;
+  border: 1px solid rgba(66, 112, 91, 0.2);
+  border-radius: 14px;
+  background: rgba(236, 246, 239, 0.7);
+}
+
+.demo-access-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.demo-access-heading strong {
+  color: #173d2a;
+  font-size: 13px;
+}
+
+.demo-access-heading span,
+.demo-access-card small {
+  color: #64766a;
+  font-size: 11px;
+}
+
+.demo-access-details {
+  display: grid;
+  gap: 5px;
+  color: #284c38;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.demo-access-card button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 38px;
+  border: 0;
+  border-radius: 9px;
+  background: #245b3a;
+  color: #fff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.demo-access-card button:hover {
+  background: #19472c;
+}
+
+@media (max-width: 520px) {
+  .demo-access-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 3px;
+  }
+}

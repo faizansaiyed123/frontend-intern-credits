@@ -1,0 +1,28 @@
+name: Mintline frontend demo CI
+
+on:
+  push:
+    branches: [demo]
+  pull_request:
+    branches: [demo]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Type-check and build demo
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out demo branch
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install dependencies
+        run: npm install
+      - name: Type-check and build
+        run: npm run build
+        env:
+          VITE_DEMO_MODE: 'true'

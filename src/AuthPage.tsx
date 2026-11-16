@@ -7,7 +7,14 @@ import {
   LockKeyhole,
   ShieldCheck,
 } from 'lucide-react';
-import { ApiError, loginAccount, registerAccount, setAccessToken } from './api';
+import {
+  ApiError,
+  DEMO_CREDENTIALS,
+  DEMO_MODE_ENABLED,
+  loginAccount,
+  registerAccount,
+  setAccessToken,
+} from './api';
 import './auth.css';
 
 interface AuthPageProps {
@@ -25,6 +32,13 @@ export default function AuthPage({ onAuthenticated, onGoHome }: AuthPageProps) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  function fillDemoCredentials() {
+    setMode('login');
+    setEmail(DEMO_CREDENTIALS.email);
+    setPassword(DEMO_CREDENTIALS.password);
+    setError('');
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -146,6 +160,22 @@ export default function AuthPage({ onAuthenticated, onGoHome }: AuthPageProps) {
               ? 'Sign in to continue to your credit workspace.'
               : 'Create an account to get started with a zero-credit balance.'}
           </p>
+          {DEMO_MODE_ENABLED && (
+            <div className="demo-access-card">
+              <div className="demo-access-heading">
+                <strong>Explore the demo workspace</strong>
+                <span>Seeded sample account</span>
+              </div>
+              <div className="demo-access-details">
+                <span>{DEMO_CREDENTIALS.email}</span>
+                <span>{DEMO_CREDENTIALS.password}</span>
+              </div>
+              <button type="button" onClick={fillDemoCredentials}>
+                Fill demo sign-in <ArrowRight size={15} />
+              </button>
+              <small>Sample data only. Do not enter a real password.</small>
+            </div>
+          )}
 
           <div
             className="auth-tabs"

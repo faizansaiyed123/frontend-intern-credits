@@ -30,6 +30,9 @@ import {
 import {
   API_BASE_URL,
   ApiError,
+  DEMO_CREDENTIALS,
+  DEMO_MODE_ENABLED,
+  IS_LOCAL_DEMO_MODE,
   clearAccessToken,
   addCredits,
   applyMigration,
@@ -105,8 +108,8 @@ function Dashboard({
   const [operationError, setOperationError] = useState('');
   const [notice, setNotice] = useState<Notice | null>(null);
 
-  const [creditAdminKey, setCreditAdminKey] = useState('');
-  const [adminKey, setAdminKey] = useState('');
+  const [creditAdminKey, setCreditAdminKey] = useState(DEMO_MODE_ENABLED ? DEMO_CREDENTIALS.creditAdminKey : '');
+  const [adminKey, setAdminKey] = useState(DEMO_MODE_ENABLED ? DEMO_CREDENTIALS.schemaAdminKey : '');
   const [migrations, setMigrations] = useState<SchemaMigration[] | null>(null);
   const [migrationLoading, setMigrationLoading] = useState(false);
   const [adminError, setAdminError] = useState('');
@@ -315,7 +318,9 @@ function Dashboard({
     }
     if (!confirmSql) {
       setAdminError(
-        'Confirm that you understand this SQL will execute against the database.',
+        DEMO_MODE_ENABLED
+          ? 'Confirm that you understand this migration will only be recorded in the demo log.'
+          : 'Confirm that you understand this SQL will execute against the database.',
       );
       return;
     }
@@ -332,7 +337,9 @@ function Dashboard({
       setAdminNotice(
         result.status === 'skipped'
           ? `"${result.migration_name}" was already recorded; no SQL was applied.`
-          : `Migration "${result.migration_name}" was applied successfully.`,
+          : DEMO_MODE_ENABLED
+            ? `Migration "${result.migration_name}" was recorded in the demo log. No SQL was executed.`
+            : `Migration "${result.migration_name}" was applied successfully.`,
       );
       setMigrationName('');
       setMigrationSql('');
@@ -353,8 +360,9 @@ function Dashboard({
     setMobileNavOpen(false);
   }
 
-  const apiStatusLabel =
-    apiState === 'online'
+  const apiStatusLabel = DEMO_MODE_ENABLED
+    ? apiState === 'offline' ? 'Demo unavailable' : 'Demo mode active'
+    : apiState === 'online'
       ? 'API connected'
       : apiState === 'checking'
         ? 'Connecting…'
@@ -443,7 +451,7 @@ function Dashboard({
           <span className={`status-dot ${apiState}`} />
           <div className="connection-copy">
             <strong>{apiStatusLabel}</strong>
-            <span>{API_BASE_URL.replace(/^https?:\/\//, '')}</span>
+            <span>{IS_LOCAL_DEMO_MODE ? 'Browser-only simulation' : API_BASE_URL.replace(/^https?:\/\//, '')}</span>
           </div>
           <button
             type="button"
@@ -463,13 +471,15 @@ function Dashboard({
           </div>
           <strong>Keep your credits in check.</strong>
           <p>A clear view of balances, without the busywork.</p>
-          <a
-            href={`${API_BASE_URL}/docs`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Explore API docs <ArrowRight size={14} />
-          </a>
+          {!IS_LOCAL_DEMO_MODE && (
+            <a
+              href={`${API_BASE_URL}/docs`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Explore API docs <ArrowRight size={14} />
+            </a>
+          )}
         </div>
         <div className="sidebar-footer">
           <div className="avatar avatar-small">ML</div>
@@ -753,8 +763,9 @@ function Dashboard({
                       aria-describedby="credit-admin-key-help"
                     />
                     <span id="credit-admin-key-help">
-                      Balance changes require a trusted operator key. It stays
-                      in memory and is not saved to browser storage.
+                      {DEMO_MODE_ENABLED
+                        ? 'The demo operator key is prefilled. Changes affect sample data only.'
+                        : 'Balance changes require a trusted operator key. It stays in memory and is not saved to browser storage.'}
                     </span>
                   </div>
                   <div className="actions-grid">
@@ -878,8 +889,9 @@ function Dashboard({
                   <div>
                     <h2>Connect as an administrator</h2>
                     <p>
-                      Enter the <code>ADMIN_API_KEY</code> configured on the
-                      backend.
+                      {DEMO_MODE_ENABLED
+                        ? 'The sample schema-admin key is prefilled for this simulation.'
+                        : <>Enter the <code>ADMIN_API_KEY</code> configured on the backend.</>}
                     </p>
                   </div>
                 </div>
@@ -1023,7 +1035,11 @@ function Dashboard({
                   <div>
                     <span className="card-kicker">ADVANCED ACTION</span>
                     <h2>Apply a schema migration</h2>
-                    <p>Use only reviewed SQL from a trusted source.</p>
+                    <p>
+                      {DEMO_MODE_ENABLED
+                        ? 'SQL is validated and recorded in the demo log; it is never executed.'
+                        : 'Use only reviewed SQL from a trusted source.'}
+                    </p>
                   </div>
                   <span className="danger-outline">
                     <LockKeyhole size={14} /> Elevated access
@@ -1070,8 +1086,9 @@ function Dashboard({
                       onChange={(event) => setConfirmSql(event.target.checked)}
                     />
                     <span>
-                      I reviewed this SQL and understand it will execute against
-                      the configured database.
+                      {DEMO_MODE_ENABLED
+                        ? 'I understand this sample migration is only validated and recorded; no SQL will run.'
+                        : 'I reviewed this SQL and understand it will execute against the configured database.'}
                     </span>
                   </label>
                   {adminError && (
@@ -1119,7 +1136,9 @@ function Dashboard({
               <footer className="page-footer">
                 <span>
                   © 2026 Mintline <span className="footer-separator">·</span>{' '}
-                  Admin actions are audited by the backend migration table.
+                  {DEMO_MODE_ENABLED
+                    ? 'Demo activity is stored in this browser only.'
+                    : 'Admin actions are audited by the backend migration table.'}
                 </span>
                 <button
                   type="button"
@@ -1174,9 +1193,13 @@ function Dashboard({
               </h2>
               <p className="modal-description">
                 {activeOperation === 'add'
-                  ? 'Add credits to this account. The updated balance will be returned by the API.'
+                  ? DEMO_MODE_ENABLED
+                    ? 'Add sample credits to this account. The updated balance is saved in the demo workspace.'
+                    : 'Add credits to this account. The updated balance will be returned by the API.'
                   : activeOperation === 'deduct'
-                    ? 'Deduct credits from the current balance. The backend prevents negative balances.'
+                    ? DEMO_MODE_ENABLED
+                      ? 'Deduct sample credits. The demo prevents the balance from going below zero.'
+                      : 'Deduct credits from the current balance. The backend prevents negative balances.'
                     : "This will set the account's current balance to zero. This action takes effect immediately."}
               </p>
               {activeOperation === 'reset' ? (
