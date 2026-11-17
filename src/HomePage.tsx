@@ -21,7 +21,8 @@ const capabilities = [
     label: 'READ',
     icon: Coins,
     title: 'Read the real balance',
-    description: 'Review the selected account’s current balance and last-updated time from the connected API.',
+    description:
+      'Review the selected account’s current balance and last-updated time from the connected API.',
     endpoint: 'GET /api/credits/{user_id}',
   },
   {
@@ -29,7 +30,8 @@ const capabilities = [
     label: 'CHANGE',
     icon: Zap,
     title: 'Apply controlled changes',
-    description: 'Add credits, deduct credits, or reset a balance. The interface reflects the API response.',
+    description:
+      'Add credits, deduct credits, or reset a balance. The interface reflects the API response.',
     endpoint: 'POST · PATCH /api/credits',
   },
   {
@@ -37,19 +39,29 @@ const capabilities = [
     label: 'ADMIN',
     icon: Database,
     title: 'Review schema migrations',
-    description: 'Read migration records and use the existing protected schema-management endpoints.',
+    description:
+      'Read migration records and use the existing protected schema-management endpoints.',
     endpoint: 'GET · POST /api/schema',
   },
 ];
 
 function Brand() {
   return (
-    <a className="home-brand" href="/" aria-label="Mintline home">
+    <a
+      className="home-brand"
+      href="/"
+      aria-label="Mintline home"
+    >
       <span className="home-brand-mark">
-        <Coins size={20} strokeWidth={2.2} />
+        <Coins
+          size={20}
+          strokeWidth={2.2}
+        />
       </span>
       <span className="home-brand-copy">
-        <span className="home-brand-name">mintline<span>.</span></span>
+        <span className="home-brand-name">
+          mintline<span>.</span>
+        </span>
         <span className="home-brand-subtitle">CREDIT WORKSPACE</span>
       </span>
     </a>
@@ -62,18 +74,28 @@ export default function HomePage({ onOpenDashboard }: HomePageProps) {
       <header className="home-header">
         <div className="home-header-inner">
           <Brand />
-          <nav className="home-nav" aria-label="Home page navigation">
+          <nav
+            className="home-nav"
+            aria-label="Home page navigation"
+          >
             <a href="#operations">Operations</a>
             <a href="#request-flow">Request flow</a>
           </nav>
-          <button type="button" className="home-header-cta" onClick={onOpenDashboard}>
+          <button
+            type="button"
+            className="home-header-cta"
+            onClick={onOpenDashboard}
+          >
             Open workspace <ArrowUpRight size={16} />
           </button>
         </div>
       </header>
 
       <main>
-        <section className="mintline-intro" id="home">
+        <section
+          className="mintline-intro"
+          id="home"
+        >
           <div className="mintline-kicker-line">
             <span>ACCOUNT OPERATIONS / 01</span>
             <span>FASTAPI · POSTGRESQL</span>
@@ -90,7 +112,11 @@ export default function HomePage({ onOpenDashboard }: HomePageProps) {
               returned by the API.
             </p>
             <div className="mintline-intro-actions">
-              <button type="button" className="mintline-primary-action" onClick={onOpenDashboard}>
+              <button
+                type="button"
+                className="mintline-primary-action"
+                onClick={onOpenDashboard}
+              >
                 Open credit workspace <ArrowRight size={16} />
               </button>
               <a
@@ -105,14 +131,21 @@ export default function HomePage({ onOpenDashboard }: HomePageProps) {
           </div>
           <div className="mintline-intro-foot">
             <span>NO SHADOW BALANCES</span>
-            <span>RESPONSES COME FROM THE SERVICE <ArrowRight size={13} /></span>
+            <span>
+              RESPONSES COME FROM THE SERVICE <ArrowRight size={13} />
+            </span>
           </div>
         </section>
 
-        <section className="mintline-operations" id="operations">
+        <section
+          className="mintline-operations"
+          id="operations"
+        >
           <div className="mintline-section-heading">
             <div>
-              <span className="mintline-section-label">01 / WHAT THE SERVICE SUPPORTS</span>
+              <span className="mintline-section-label">
+                01 / WHAT THE SERVICE SUPPORTS
+              </span>
               <h2>
                 Three jobs.
                 <br />
@@ -128,10 +161,16 @@ export default function HomePage({ onOpenDashboard }: HomePageProps) {
 
           <div className="mintline-operation-list">
             {capabilities.map((item) => (
-              <article className="mintline-operation-row" key={item.number}>
+              <article
+                className="mintline-operation-row"
+                key={item.number}
+              >
                 <span className="mintline-operation-number">{item.number}</span>
                 <span className="mintline-operation-icon">
-                  <item.icon size={20} strokeWidth={1.8} />
+                  <item.icon
+                    size={20}
+                    strokeWidth={1.8}
+                  />
                 </span>
                 <div className="mintline-operation-copy">
                   <span>{item.label}</span>
@@ -139,13 +178,18 @@ export default function HomePage({ onOpenDashboard }: HomePageProps) {
                   <p>{item.description}</p>
                 </div>
                 <code>{item.endpoint}</code>
-                <ArrowUpRight className="mintline-operation-arrow" size={17} />
+                <ArrowUpRight
+                  className="mintline-operation-arrow"
+                  size={17}
+                />
               </article>
             ))}
           </div>
 
           <div className="mintline-truth-note">
-            <span className="mintline-truth-mark"><Check size={15} /></span>
+            <span className="mintline-truth-mark">
+              <Check size={15} />
+            </span>
             <p>
               <strong>Built around the actual contract.</strong> The interface
               shows the account state returned by the backend; it does not
@@ -154,7 +198,10 @@ export default function HomePage({ onOpenDashboard }: HomePageProps) {
           </div>
         </section>
 
-        <section className="mintline-request-flow" id="request-flow">
+        <section
+          className="mintline-request-flow"
+          id="request-flow"
+        >
           <div className="mintline-flow-heading">
             <span className="mintline-section-label">02 / REQUEST FLOW</span>
             <h2>
@@ -177,17 +224,24 @@ export default function HomePage({ onOpenDashboard }: HomePageProps) {
               <p>Choose an existing user and the operation to perform.</p>
               <div className="mintline-flow-detail">
                 <span>INPUT</span>
-                <span><Coins size={14} /> Account ID</span>
+                <span>
+                  <Coins size={14} /> Account ID
+                </span>
               </div>
             </article>
             <article className="mintline-flow-step">
               <span className="mintline-flow-number">02</span>
               <span className="mintline-flow-role">THE SERVICE</span>
               <h3>Validate and process</h3>
-              <p>FastAPI checks access, applies the rules, and talks to PostgreSQL.</p>
+              <p>
+                FastAPI checks access, applies the rules, and talks to
+                PostgreSQL.
+              </p>
               <div className="mintline-flow-detail">
                 <span>API</span>
-                <span><Database size={14} /> FastAPI · PostgreSQL</span>
+                <span>
+                  <Database size={14} /> FastAPI · PostgreSQL
+                </span>
               </div>
             </article>
             <article className="mintline-flow-step">
@@ -197,31 +251,46 @@ export default function HomePage({ onOpenDashboard }: HomePageProps) {
               <p>The dashboard updates from the response, not a local guess.</p>
               <div className="mintline-flow-detail">
                 <span>RESULT</span>
-                <span><Check size={14} /> API response</span>
+                <span>
+                  <Check size={14} /> API response
+                </span>
               </div>
             </article>
           </div>
 
           <div className="mintline-stack-line">
-            <span>FRONTEND <strong>React</strong></span>
-            <span>API <strong>FastAPI</strong></span>
-            <span>DATA <strong>PostgreSQL</strong></span>
+            <span>
+              FRONTEND <strong>React</strong>
+            </span>
+            <span>
+              API <strong>FastAPI</strong>
+            </span>
+            <span>
+              DATA <strong>PostgreSQL</strong>
+            </span>
           </div>
         </section>
 
         <section className="mintline-access">
           <div className="mintline-access-copy">
-            <span className="mintline-section-label">03 / ACCESS BOUNDARIES</span>
+            <span className="mintline-section-label">
+              03 / ACCESS BOUNDARIES
+            </span>
             <h2>Every action has its own gate.</h2>
             <p>
               Balance reads require a valid session. Credit mutations use a
-              separate operator key, while schema migrations are protected by
-              a distinct administrator key.
+              separate operator key, while schema migrations are protected by a
+              distinct administrator key.
             </p>
           </div>
           <div className="mintline-access-action">
-            <span><LockKeyhole size={16} /> AUTHENTICATED WORKSPACE</span>
-            <button type="button" onClick={onOpenDashboard}>
+            <span>
+              <LockKeyhole size={16} /> AUTHENTICATED WORKSPACE
+            </span>
+            <button
+              type="button"
+              onClick={onOpenDashboard}
+            >
               Open workspace <ArrowRight size={16} />
             </button>
           </div>
