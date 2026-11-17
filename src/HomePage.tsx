@@ -1,5 +1,4 @@
 import {
-  ArrowDownLeft,
   ArrowRight,
   ArrowUpRight,
   Check,
@@ -8,9 +7,6 @@ import {
   Database,
   ExternalLink,
   LockKeyhole,
-  Plus,
-  RotateCcw,
-  ShieldCheck,
   Zap,
 } from 'lucide-react';
 import './home.css';
@@ -22,50 +18,38 @@ interface HomePageProps {
 const capabilities = [
   {
     number: '01',
+    label: 'READ',
     icon: Coins,
     title: 'Read the real balance',
-    description:
-      'Review your own balance and last-updated time from the connected API.',
+    description: 'Review the selected account’s current balance and last-updated time from the connected API.',
     endpoint: 'GET /api/credits/{user_id}',
-    tone: 'mint',
   },
   {
     number: '02',
+    label: 'CHANGE',
     icon: Zap,
-    title: 'Make controlled changes',
-    description:
-      'Add credits, deduct credits, or reset a balance. The UI updates from the API response.',
+    title: 'Apply controlled changes',
+    description: 'Add credits, deduct credits, or reset a balance. The interface reflects the API response.',
     endpoint: 'POST · PATCH /api/credits',
-    tone: 'sand',
   },
   {
     number: '03',
+    label: 'ADMIN',
     icon: Database,
-    title: 'Manage schema migrations',
-    description:
-      'Review migration records and access the existing admin-only schema endpoints with your API key.',
+    title: 'Review schema migrations',
+    description: 'Read migration records and use the existing protected schema-management endpoints.',
     endpoint: 'GET · POST /api/schema',
-    tone: 'lilac',
   },
 ];
 
 function Brand() {
   return (
-    <a
-      className="home-brand"
-      href="/"
-      aria-label="Mintline home"
-    >
+    <a className="home-brand" href="/" aria-label="Mintline home">
       <span className="home-brand-mark">
-        <Coins
-          size={21}
-          strokeWidth={2.2}
-        />
+        <Coins size={20} strokeWidth={2.2} />
       </span>
       <span className="home-brand-copy">
-        <span className="home-brand-name">
-          mintline<span>.</span>
-        </span>
+        <span className="home-brand-name">mintline<span>.</span></span>
         <span className="home-brand-subtitle">CREDIT WORKSPACE</span>
       </span>
     </a>
@@ -74,339 +58,177 @@ function Brand() {
 
 export default function HomePage({ onOpenDashboard }: HomePageProps) {
   return (
-    <div className="home-page">
+    <div className="home-page mintline-page">
       <header className="home-header">
         <div className="home-header-inner">
           <Brand />
-          <nav
-            className="home-nav"
-            aria-label="Home page navigation"
-          >
-            <a href="#capabilities">Capabilities</a>
-            <a href="#integration">Integration</a>
+          <nav className="home-nav" aria-label="Home page navigation">
+            <a href="#operations">Operations</a>
+            <a href="#request-flow">Request flow</a>
           </nav>
-          <button
-            type="button"
-            className="home-header-cta"
-            onClick={onOpenDashboard}
-          >
+          <button type="button" className="home-header-cta" onClick={onOpenDashboard}>
             Open workspace <ArrowUpRight size={16} />
           </button>
         </div>
       </header>
 
       <main>
-        <section className="home-hero">
-          <div
-            className="home-hero-grid"
-            aria-hidden="true"
-          />
-          <div className="home-hero-inner">
-            <div className="home-hero-copy">
-              <div className="home-eyebrow">
-                <span /> A CLEARER WAY TO MANAGE CREDITS
-              </div>
-              <h1>
-                Credit operations,
-                <br />
-                <span>without the clutter.</span>
-              </h1>
-              <p className="home-hero-description">
-                A focused interface for your credit-management API. Sign in to
-                review your balance and apply controlled credit changes through
-                the connected backend.
-              </p>
-              <div className="home-hero-actions">
-                <button
-                  type="button"
-                  className="home-primary-cta"
-                  onClick={onOpenDashboard}
-                >
-                  Open credit dashboard <ArrowRight size={17} />
-                </button>
-                <a
-                  className="home-secondary-cta"
-                  href="https://github.com/faizansaiyed123/backend-intern-credits"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Explore the backend <ExternalLink size={16} />
-                </a>
-              </div>
-              <div className="home-stack-note">
-                <span className="stack-mark">API</span>
-                <span>FastAPI + PostgreSQL</span>
-                <span className="stack-separator">·</span>
-                <span>Real API data, not demo metrics</span>
-              </div>
-            </div>
-
-            <div
-              className="home-visual"
-              aria-label="Illustration of the Mintline credit dashboard"
-            >
-              <div className="visual-glow" />
-              <div className="visual-floating-label">
-                <span className="visual-live-dot" /> BUILT AROUND YOUR API
-              </div>
-              <div className="visual-window">
-                <div className="visual-window-top">
-                  <div className="visual-window-dots">
-                    <i />
-                    <i />
-                    <i />
-                  </div>
-                  <span>mintline / workspace</span>
-                  <span className="visual-window-lock">
-                    <LockKeyhole size={12} />
-                  </span>
-                </div>
-                <div className="visual-window-content">
-                  <div className="visual-account-top">
-                    <div>
-                      <span className="visual-micro-label">
-                        ACCOUNT BALANCE
-                      </span>
-                      <span className="visual-account-caption">
-                        Live value in the dashboard
-                      </span>
-                    </div>
-                    <span className="visual-account-icon">
-                      <Coins size={18} />
-                    </span>
-                  </div>
-                  <div className="visual-balance-placeholder">
-                    <span>—</span>
-                    <small>credits</small>
-                  </div>
-                  <div className="visual-value-note">
-                    <span className="visual-note-dot" /> Read from the selected
-                    account
-                  </div>
-                  <div className="visual-divider" />
-                  <div className="visual-actions-label">
-                    SUPPORTED OPERATIONS
-                  </div>
-                  <div className="visual-operation">
-                    <span className="visual-operation-icon visual-add">
-                      <Plus size={15} />
-                    </span>
-                    <span>
-                      <strong>Add credits</strong>
-                      <small>Increase balance</small>
-                    </span>
-                    <ArrowUpRight
-                      size={15}
-                      className="visual-operation-arrow"
-                    />
-                  </div>
-                  <div className="visual-operation">
-                    <span className="visual-operation-icon visual-deduct">
-                      <ArrowDownLeft size={15} />
-                    </span>
-                    <span>
-                      <strong>Deduct credits</strong>
-                      <small>Block negative balances</small>
-                    </span>
-                    <ArrowUpRight
-                      size={15}
-                      className="visual-operation-arrow"
-                    />
-                  </div>
-                  <div className="visual-operation">
-                    <span className="visual-operation-icon visual-reset">
-                      <RotateCcw size={15} />
-                    </span>
-                    <span>
-                      <strong>Reset balance</strong>
-                      <small>Confirm before clearing</small>
-                    </span>
-                    <ArrowUpRight
-                      size={15}
-                      className="visual-operation-arrow"
-                    />
-                  </div>
-                </div>
-                <div className="visual-window-foot">
-                  <span>
-                    <ShieldCheck size={13} /> API-backed actions
-                  </span>
-                  <span>
-                    <Check size={13} /> No fake metrics
-                  </span>
-                </div>
-              </div>
-              <div className="visual-orbit visual-orbit-one" />
-              <div className="visual-orbit visual-orbit-two" />
+        <section className="mintline-intro" id="home">
+          <div className="mintline-kicker-line">
+            <span>ACCOUNT OPERATIONS / 01</span>
+            <span>FASTAPI · POSTGRESQL</span>
+          </div>
+          <h1>
+            Credit operations,
+            <br />
+            <em>without the guesswork.</em>
+          </h1>
+          <div className="mintline-intro-bottom">
+            <p>
+              Mintline is a focused control surface for the credit service.
+              Review an account, make a deliberate change, and see the value
+              returned by the API.
+            </p>
+            <div className="mintline-intro-actions">
+              <button type="button" className="mintline-primary-action" onClick={onOpenDashboard}>
+                Open credit workspace <ArrowRight size={16} />
+              </button>
+              <a
+                className="mintline-secondary-action"
+                href="https://github.com/faizansaiyed123/backend-intern-credits"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Backend source <ExternalLink size={14} />
+              </a>
             </div>
           </div>
-          <div className="home-hero-bottom">
-            <span>BUILT FOR CLARITY</span>
-            <span className="home-bottom-rule" />
-            <span>01 / 03 CORE CAPABILITIES</span>
+          <div className="mintline-intro-foot">
+            <span>NO SHADOW BALANCES</span>
+            <span>RESPONSES COME FROM THE SERVICE <ArrowRight size={13} /></span>
           </div>
         </section>
 
-        <section
-          className="home-capabilities home-section"
-          id="capabilities"
-        >
-          <div className="home-section-heading">
+        <section className="mintline-operations" id="operations">
+          <div className="mintline-section-heading">
             <div>
-              <div className="home-eyebrow home-eyebrow-light">
-                <span /> WHAT THE API SUPPORTS
-              </div>
+              <span className="mintline-section-label">01 / WHAT THE SERVICE SUPPORTS</span>
               <h2>
-                Everything has a purpose.
+                Three jobs.
                 <br />
-                <span>Nothing is made up.</span>
+                <em>One clear workspace.</em>
               </h2>
             </div>
             <p>
-              The experience stays intentionally small: each control maps to an
-              endpoint in your backend, instead of filling the screen with
-              features the service cannot provide.
+              The homepage stays close to the available API. No fabricated
+              transaction feed, placeholder balances, or controls that the
+              backend cannot perform.
             </p>
           </div>
-          <div className="home-capability-grid">
-            {capabilities.map((item) => {
-              const Icon = item.icon;
-              return (
-                <article
-                  className="home-capability-card"
-                  key={item.number}
-                >
-                  <div className="home-capability-card-top">
-                    <span className={`home-capability-icon tone-${item.tone}`}>
-                      <Icon size={20} />
-                    </span>
-                    <span className="home-capability-number">
-                      {item.number}
-                    </span>
-                  </div>
+
+          <div className="mintline-operation-list">
+            {capabilities.map((item) => (
+              <article className="mintline-operation-row" key={item.number}>
+                <span className="mintline-operation-number">{item.number}</span>
+                <span className="mintline-operation-icon">
+                  <item.icon size={20} strokeWidth={1.8} />
+                </span>
+                <div className="mintline-operation-copy">
+                  <span>{item.label}</span>
                   <h3>{item.title}</h3>
                   <p>{item.description}</p>
-                  <div className="home-endpoint">
-                    <span />
-                    {item.endpoint}
-                  </div>
-                </article>
-              );
-            })}
+                </div>
+                <code>{item.endpoint}</code>
+                <ArrowUpRight className="mintline-operation-arrow" size={17} />
+              </article>
+            ))}
           </div>
-          <div className="home-truth-note">
-            <div className="truth-note-icon">
-              <Check size={17} />
-            </div>
+
+          <div className="mintline-truth-note">
+            <span className="mintline-truth-mark"><Check size={15} /></span>
             <p>
-              <strong>Designed around the real contract.</strong> Accounts have
-              their own sign-in session. Credit operations are restricted to the
-              authenticated account; the service does not expose a credit
-              transaction history.
+              <strong>Built around the actual contract.</strong> The interface
+              shows the account state returned by the backend; it does not
+              invent a credit history that the service does not provide.
             </p>
           </div>
         </section>
 
-        <section
-          className="home-integration home-section"
-          id="integration"
-        >
-          <div className="home-integration-copy">
-            <div className="home-eyebrow home-eyebrow-light">
-              <span /> SIMPLE BY DESIGN
-            </div>
+        <section className="mintline-request-flow" id="request-flow">
+          <div className="mintline-flow-heading">
+            <span className="mintline-section-label">02 / REQUEST FLOW</span>
             <h2>
-              Your backend stays
+              One source of truth.
               <br />
-              <span>the source of truth.</span>
+              <em>Three clear steps.</em>
             </h2>
             <p>
-              Mintline is a presentation layer over your existing FastAPI
-              service. Balances are fetched from the API, mutations are sent to
-              the API, and the interface reflects the response.
+              The browser sends an authenticated request. FastAPI applies the
+              business rules and reads or updates PostgreSQL. Mintline renders
+              the response it receives.
             </p>
-            <button
-              type="button"
-              className="home-primary-cta"
-              onClick={onOpenDashboard}
-            >
-              Go to the dashboard <ArrowRight size={17} />
+          </div>
+
+          <div className="mintline-flow-track">
+            <article className="mintline-flow-step">
+              <span className="mintline-flow-number">01</span>
+              <span className="mintline-flow-role">THE OPERATOR</span>
+              <h3>Select an account</h3>
+              <p>Choose an existing user and the operation to perform.</p>
+              <div className="mintline-flow-detail">
+                <span>INPUT</span>
+                <span><Coins size={14} /> Account ID</span>
+              </div>
+            </article>
+            <article className="mintline-flow-step">
+              <span className="mintline-flow-number">02</span>
+              <span className="mintline-flow-role">THE SERVICE</span>
+              <h3>Validate and process</h3>
+              <p>FastAPI checks access, applies the rules, and talks to PostgreSQL.</p>
+              <div className="mintline-flow-detail">
+                <span>API</span>
+                <span><Database size={14} /> FastAPI · PostgreSQL</span>
+              </div>
+            </article>
+            <article className="mintline-flow-step">
+              <span className="mintline-flow-number">03</span>
+              <span className="mintline-flow-role">THE INTERFACE</span>
+              <h3>Show the returned state</h3>
+              <p>The dashboard updates from the response, not a local guess.</p>
+              <div className="mintline-flow-detail">
+                <span>RESULT</span>
+                <span><Check size={14} /> API response</span>
+              </div>
+            </article>
+          </div>
+
+          <div className="mintline-stack-line">
+            <span>FRONTEND <strong>React</strong></span>
+            <span>API <strong>FastAPI</strong></span>
+            <span>DATA <strong>PostgreSQL</strong></span>
+          </div>
+        </section>
+
+        <section className="mintline-access">
+          <div className="mintline-access-copy">
+            <span className="mintline-section-label">03 / ACCESS BOUNDARIES</span>
+            <h2>Every action has its own gate.</h2>
+            <p>
+              Balance reads require a valid session. Credit mutations use a
+              separate operator key, while schema migrations are protected by
+              a distinct administrator key.
+            </p>
+          </div>
+          <div className="mintline-access-action">
+            <span><LockKeyhole size={16} /> AUTHENTICATED WORKSPACE</span>
+            <button type="button" onClick={onOpenDashboard}>
+              Open workspace <ArrowRight size={16} />
             </button>
-          </div>
-          <div className="home-flow-card">
-            <div className="home-flow-heading">
-              <span className="home-flow-heading-icon">
-                <Database size={18} />
-              </span>
-              <span>
-                <strong>Request flow</strong>
-                <small>How the workspace works</small>
-              </span>
-            </div>
-            <div className="home-flow-step">
-              <span className="home-flow-step-number">01</span>
-              <div>
-                <strong>Sign in to your account</strong>
-                <small>Load your account securely</small>
-              </div>
-              <span className="home-flow-tag">INPUT</span>
-            </div>
-            <div className="home-flow-connector">
-              <span />
-            </div>
-            <div className="home-flow-step">
-              <span className="home-flow-step-number">02</span>
-              <div>
-                <strong>Call the credit API</strong>
-                <small>Read or mutate the balance</small>
-              </div>
-              <span className="home-flow-tag">FASTAPI</span>
-            </div>
-            <div className="home-flow-connector">
-              <span />
-            </div>
-            <div className="home-flow-step">
-              <span className="home-flow-step-number">03</span>
-              <div>
-                <strong>Render the response</strong>
-                <small>Show the returned balance</small>
-              </div>
-              <span className="home-flow-tag">UI</span>
-            </div>
-            <div className="home-flow-foot">
-              <Zap size={15} />
-              <span>One source of truth. No shadow balances.</span>
-            </div>
-          </div>
-        </section>
-
-        <section className="home-final-cta">
-          <div className="home-final-cta-copy">
-            <span className="home-final-kicker">READY WHEN YOU ARE</span>
-            <h2>
-              Make every credit change
-              <br />
-              with confidence.
-            </h2>
-            <p>Open the workspace to connect to your running API.</p>
-          </div>
-          <button
-            type="button"
-            className="home-final-button"
-            onClick={onOpenDashboard}
-          >
-            Open workspace <ArrowRight size={17} />
-          </button>
-          <div
-            className="home-final-decoration"
-            aria-hidden="true"
-          >
-            <Coins size={72} />
           </div>
         </section>
       </main>
 
-      <footer className="home-footer">
+      <footer className="home-footer mintline-footer">
         <Brand />
         <span>Credit management, made clear.</span>
         <a
