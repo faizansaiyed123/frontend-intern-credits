@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   integrated-e2e:
@@ -150,28 +150,3 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-      - name: Publish integrated test evidence without changing product screenshots
-        if: success()
-        shell: bash
-        run: |
-          set -euo pipefail
-          evidence="$(mktemp -d)"
-          mkdir -p "$evidence/docs/testing"
-          cp docs/testing/INTEGRATION-REPORT.md "$evidence/docs/testing/"
-          cp docs/testing/api-network.json "$evidence/docs/testing/"
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch origin main
-          git reset --hard origin/main
-
-          cp "$evidence/docs/testing/INTEGRATION-REPORT.md" docs/testing/
-          cp "$evidence/docs/testing/api-network.json" docs/testing/
-
-          git add docs/testing/INTEGRATION-REPORT.md docs/testing/api-network.json
-          if git diff --cached --quiet; then
-            echo "Published integration evidence already matches main; nothing to commit."
-            exit 0
-          fi
-          git commit -m "Publish Mintline integration evidence"
-          git push origin HEAD:main
