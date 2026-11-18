@@ -563,7 +563,7 @@ async function run() {
   await verify('Public homepage renders', async () => {
     await page.goto(baseUrl, { waitUntil: 'networkidle' });
     await page
-      .getByRole('button', { name: /Open credit dashboard/i })
+      .getByRole('button', { name: /Open credit workspace/i })
       .waitFor({ state: 'visible' });
     await takeScreenshot(page, '01-homepage.png');
   });
@@ -572,7 +572,7 @@ async function run() {
     'Opening the dashboard calls live health and account endpoints',
     async () => {
       await page
-        .getByRole('button', { name: /Open credit dashboard/i })
+        .getByRole('button', { name: /Open credit workspace/i })
         .click();
       await page.waitForURL('**/dashboard');
       await page.getByRole('tab', { name: 'Create account' }).click();
